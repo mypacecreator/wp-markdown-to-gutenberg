@@ -1,7 +1,7 @@
 /**
  * Supported callout types. Add entries here to support new types.
  */
-const CALLOUT_TYPES = [ 'info', 'warning', 'highlight' ];
+const CALLOUT_TYPES = [ 'info', 'warning', 'success' ];
 
 /**
  * Parse plain text and extract :::type ... ::: blocks.
@@ -19,7 +19,7 @@ export function parseNotation( text ) {
 
 	const typePattern = CALLOUT_TYPES.join( '|' );
 	const regex = new RegExp(
-		`^:::(${ typePattern })\\s*\\n([\\s\\S]*?)\\n^:::[ \\t]*$`,
+		`^:::(${ typePattern })\\s*\\n([\\s\\S]*?)\\n^[ \\t]*:::[ \\t]*$`,
 		'gm'
 	);
 

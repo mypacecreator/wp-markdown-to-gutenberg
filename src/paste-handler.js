@@ -3,100 +3,134 @@ import { dispatch } from '@wordpress/data';
 import { parseNotation, hasNotation } from './notation-parser';
 
 /**
- * Install a paste event listener on the document (capture phase)
- * to intercept :::type ... ::: notation before Gutenberg processes it.
+ * The paste event handler.
+ * Intercepts paste containing :::type notation, converts to group blocks,
+ * and inserts them via the block editor data store.
  *
- * Only intervenes when the pasted text contains our notation.
- * All other paste events pass through to Gutenberg untouched.
+ * @param {ClipboardEvent} event
  */
-export function installPasteHandler() {
+function onPaste( event ) {
 	// eslint-disable-next-line no-console
-	console.log( '[WPMTG] Paste handler installed' );
+	console.log( '[WPMTG] Paste event captured', {
+		target: event.target?.tagName,
+		phase: event.eventPhase,
+	} );
 
-	document.addEventListener(
-		'paste',
-		( event ) => {
-			// eslint-disable-next-line no-console
-			console.log( '[WPMTG] Paste event captured', {
-				target: event.target,
-				phase: event.eventPhase,
+	const plainText = event.clipboardData?.getData( 'text/plain' ) ?? '';
+
+	// eslint-disable-next-line no-console
+	console.log( '[WPMTG] plainText:', JSON.stringify( plainText ) );
+
+	if ( ! plainText || ! hasNotation( plainText ) ) {
+		// eslint-disable-next-line no-console
+		console.log( '[WPMTG] No notation found, passing through' );
+		return;
+	}
+
+	const segments = parseNotation( plainText );
+
+	// eslint-disable-next-line no-console
+	console.log( '[WPMTG] Parsed segments:', segments );
+
+	if ( ! segments.some( ( s ) => s.type === 'callout' ) ) {
+		return;
+	}
+
+	// Block Gutenberg's default paste processing
+	event.preventDefault();
+	event.stopImmediatePropagation();
+
+	// eslint-disable-next-line no-console
+	console.log( '[WPMTG] Prevented default, converting to blocks...' );
+
+	const allBlocks = [];
+
+	for ( const segment of segments ) {
+		if ( segment.type === 'callout' ) {
+			const innerBlocks = pasteHandler( {
+				plainText: segment.content,
+				mode: 'BLOCKS',
 			} );
 
-			const plainText =
-				event.clipboardData?.getData( 'text/plain' ) ?? '';
-
 			// eslint-disable-next-line no-console
-			console.log( '[WPMTG] plainText:', JSON.stringify( plainText ) );
+			console.log( '[WPMTG] Inner blocks:', innerBlocks );
 
-			// Only intervene when our notation is present
-			if ( ! plainText || ! hasNotation( plainText ) ) {
-				// eslint-disable-next-line no-console
-				console.log( '[WPMTG] No notation found, passing through' );
-				return;
-			}
-
-			const segments = parseNotation( plainText );
-
-			// eslint-disable-next-line no-console
-			console.log( '[WPMTG] Parsed segments:', segments );
-
-			// If no callout segments were found, let Gutenberg handle it
-			if ( ! segments.some( ( s ) => s.type === 'callout' ) ) {
-				return;
-			}
-
-			// Block Gutenberg's default paste processing
-			event.preventDefault();
-			event.stopImmediatePropagation();
-
-			// eslint-disable-next-line no-console
-			console.log(
-				'[WPMTG] Prevented default, converting to blocks...'
+			const groupBlock = createBlock(
+				'core/group',
+				{
+					className: `is-style-vk-group-alert-${ segment.calloutType }`,
+				},
+				Array.isArray( innerBlocks ) ? innerBlocks : []
 			);
 
-			// Convert each segment to blocks
-			const allBlocks = [];
+			allBlocks.push( groupBlock );
+		} else if ( segment.content.trim() ) {
+			const normalBlocks = pasteHandler( {
+				plainText: segment.content,
+				mode: 'BLOCKS',
+			} );
 
-			for ( const segment of segments ) {
-				if ( segment.type === 'callout' ) {
-					// Convert inner content to blocks via Gutenberg's pasteHandler
-					const innerBlocks = pasteHandler( {
-						plainText: segment.content,
-						mode: 'BLOCKS',
-					} );
-
-					// eslint-disable-next-line no-console
-					console.log( '[WPMTG] Inner blocks:', innerBlocks );
-
-					const groupBlock = createBlock(
-						'core/group',
-						{
-							className: `is-style-${ segment.calloutType }`,
-						},
-						Array.isArray( innerBlocks ) ? innerBlocks : []
-					);
-
-					allBlocks.push( groupBlock );
-				} else if ( segment.content.trim() ) {
-					// Non-callout text: convert normally
-					const normalBlocks = pasteHandler( {
-						plainText: segment.content,
-						mode: 'BLOCKS',
-					} );
-
-					if ( Array.isArray( normalBlocks ) ) {
-						allBlocks.push( ...normalBlocks );
-					}
-				}
+			if ( Array.isArray( normalBlocks ) ) {
+				allBlocks.push( ...normalBlocks );
 			}
+		}
+	}
 
+	// eslint-disable-next-line no-console
+	console.log( '[WPMTG] All blocks to insert:', allBlocks );
+
+	if ( allBlocks.length > 0 ) {
+		dispatch( 'core/block-editor' ).insertBlocks( allBlocks );
+	}
+}
+
+/**
+ * Attach the paste listener to a document object.
+ *
+ * @param {Document} doc  The document to attach to
+ * @param {string}   label  Label for debug logging
+ */
+function attachToDocument( doc, label ) {
+	doc.addEventListener( 'paste', onPaste, true );
+	// eslint-disable-next-line no-console
+	console.log( `[WPMTG] Paste handler installed on ${ label }` );
+}
+
+/**
+ * Install paste handler on both the parent document (fallback for
+ * non-iframe editors) and the editor iframe's document.
+ *
+ * The editor iframe is rendered asynchronously, so we poll until
+ * it appears and its contentDocument is accessible.
+ */
+export function installPasteHandler() {
+	// Fallback: attach to parent document (works if editor is NOT in iframe)
+	attachToDocument( document, 'parent document' );
+
+	// Poll for the editor iframe
+	const POLL_INTERVAL_MS = 500;
+	const MAX_ATTEMPTS = 60; // 30 seconds max
+	let attempts = 0;
+
+	const poller = setInterval( () => {
+		attempts++;
+
+		const iframe = document.querySelector(
+			'iframe[name="editor-canvas"]'
+		);
+
+		if ( iframe && iframe.contentDocument ) {
+			clearInterval( poller );
+			attachToDocument( iframe.contentDocument, 'iframe document' );
+			return;
+		}
+
+		if ( attempts >= MAX_ATTEMPTS ) {
+			clearInterval( poller );
 			// eslint-disable-next-line no-console
-			console.log( '[WPMTG] All blocks to insert:', allBlocks );
-
-			if ( allBlocks.length > 0 ) {
-				dispatch( 'core/block-editor' ).insertBlocks( allBlocks );
-			}
-		},
-		true // capture phase — fire before Gutenberg's handler
-	);
+			console.log(
+				'[WPMTG] Editor iframe not found after polling. Parent document listener is active as fallback.'
+			);
+		}
+	}, POLL_INTERVAL_MS );
 }
