@@ -80,7 +80,7 @@ paste イベント (iframe contentDocument)
 ファイル構成図では「変更なし」と記載したが、正式版では以下の変更が必要：
 
 - コードブロック抑止ロジックの追加（①の実装）
-- `hasNotation()` 更新に伴う条件分岐の修正（後述 §未決事項-1 参照）
+- `hasNotation()` 更新に伴う条件分岐の修正（後述『未決事項・要確認 > 1. hasNotation() ...』参照）
 - `text` セグメントを `pasteHandler` ではなく `line-parser` に渡す処理
 - 新セグメント型（`more`, `button`, `reuse`, `shortcode`, `generic-block`, `paragraph`）のハンドリング
 
