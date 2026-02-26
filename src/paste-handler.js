@@ -58,7 +58,7 @@ function onPaste( event ) {
 			const groupBlock = createBlock(
 				'core/group',
 				{
-					className: `is-style-vk-group-alert-${ segment.calloutType }`,
+					className: `is-style-${ segment.calloutType }`,
 				},
 				Array.isArray( innerBlocks ) ? innerBlocks : []
 			);

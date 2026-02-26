@@ -1,7 +1,7 @@
 /**
  * Supported callout types. Add entries here to support new types.
  */
-const CALLOUT_TYPES = [ 'info', 'warning', 'success' ];
+const CALLOUT_TYPES = [ 'vk-group-alert-info', 'vk-group-alert-warning', 'vk-group-alert-success' ];
 
 /**
  * Parse plain text and extract :::type ... ::: blocks.
