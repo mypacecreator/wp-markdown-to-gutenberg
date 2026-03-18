@@ -7,12 +7,12 @@ const CALLOUT_TYPES = [ 'vk-group-alert-info', 'vk-group-alert-warning', 'vk-gro
  * Regex for linked image: [![alt](img-url)](link-url)
  * Pattern 2 must be tested before Pattern 1 to avoid partial matches.
  */
-const LINKED_IMAGE_REGEX = /^\[!\[([^\]]*)\]\(([^)]+)\)\]\(([^)]+)\)\s*$/;
+const LINKED_IMAGE_REGEX = /^\[!\[([^\]]*)\]\(([^)]+)\)\]\(([^)]+)\)\s*$/m;
 
 /**
  * Regex for plain image: ![alt](img-url)
  */
-const PLAIN_IMAGE_REGEX = /^!\[([^\]]*)\]\(([^)]+)\)\s*$/;
+const PLAIN_IMAGE_REGEX = /^!\[([^\]]*)\]\(([^)]+)\)\s*$/m;
 
 /**
  * Split a text string into segments, extracting standalone image lines.
