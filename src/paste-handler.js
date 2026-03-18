@@ -3,9 +3,23 @@ import { dispatch } from '@wordpress/data';
 import { parseNotation, hasNotation } from './notation-parser';
 
 /**
+ * Convert an image segment to a core/image block.
+ *
+ * @param {Object} segment  Image segment with url, alt, and optional href
+ * @return {Object} core/image block
+ */
+function imageSegmentToBlock( segment ) {
+	const attrs = { url: segment.url, alt: segment.alt };
+	if ( segment.href ) {
+		attrs.href = segment.href;
+	}
+	return createBlock( 'core/image', attrs );
+}
+
+/**
  * The paste event handler.
- * Intercepts paste containing :::type notation, converts to group blocks,
- * and inserts them via the block editor data store.
+ * Intercepts paste containing :::type notation or image lines, converts to
+ * group/image blocks, and inserts them via the block editor data store.
  *
  * @param {ClipboardEvent} event
  */
@@ -32,7 +46,10 @@ function onPaste( event ) {
 	// eslint-disable-next-line no-console
 	console.log( '[WPMTG] Parsed segments:', segments );
 
-	if ( ! segments.some( ( s ) => s.type === 'callout' ) ) {
+	const hasActionable = segments.some(
+		( s ) => s.type === 'callout' || s.type === 'image'
+	);
+	if ( ! hasActionable ) {
 		return;
 	}
 
@@ -46,11 +63,24 @@ function onPaste( event ) {
 	const allBlocks = [];
 
 	for ( const segment of segments ) {
-		if ( segment.type === 'callout' ) {
-			const innerBlocks = pasteHandler( {
-				plainText: segment.content,
-				mode: 'BLOCKS',
-			} );
+		if ( segment.type === 'image' ) {
+			allBlocks.push( imageSegmentToBlock( segment ) );
+		} else if ( segment.type === 'callout' ) {
+			const innerBlocks = [];
+
+			for ( const inner of segment.innerSegments ) {
+				if ( inner.type === 'image' ) {
+					innerBlocks.push( imageSegmentToBlock( inner ) );
+				} else if ( inner.content.trim() ) {
+					const converted = pasteHandler( {
+						plainText: inner.content,
+						mode: 'BLOCKS',
+					} );
+					if ( Array.isArray( converted ) ) {
+						innerBlocks.push( ...converted );
+					}
+				}
+			}
 
 			// eslint-disable-next-line no-console
 			console.log( '[WPMTG] Inner blocks:', innerBlocks );
@@ -60,7 +90,7 @@ function onPaste( event ) {
 				{
 					className: `is-style-${ segment.calloutType }`,
 				},
-				Array.isArray( innerBlocks ) ? innerBlocks : []
+				innerBlocks
 			);
 
 			allBlocks.push( groupBlock );

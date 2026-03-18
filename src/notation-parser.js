@@ -4,11 +4,71 @@
 const CALLOUT_TYPES = [ 'vk-group-alert-info', 'vk-group-alert-warning', 'vk-group-alert-success' ];
 
 /**
- * Parse plain text and extract :::type ... ::: blocks.
+ * Regex for linked image: [![alt](img-url)](link-url)
+ * Pattern 2 must be tested before Pattern 1 to avoid partial matches.
+ */
+const LINKED_IMAGE_REGEX = /^\[!\[([^\]]*)\]\(([^)]+)\)\]\(([^)]+)\)\s*$/;
+
+/**
+ * Regex for plain image: ![alt](img-url)
+ */
+const PLAIN_IMAGE_REGEX = /^!\[([^\]]*)\]\(([^)]+)\)\s*$/;
+
+/**
+ * Split a text string into segments, extracting standalone image lines.
  *
  * Returns an array of segments:
- *   { type: 'text', content: '...' }
- *   { type: 'callout', calloutType: 'info', content: '...' }
+ *   { type: 'text',  content: '...' }
+ *   { type: 'image', alt: '...', url: '...', href?: '...' }
+ *
+ * Pattern 2 (linked image) is evaluated before Pattern 1 (plain image).
+ *
+ * @param {string} text Plain text to parse
+ * @return {Array} Parsed segments
+ */
+function splitTextByImages( text ) {
+	const lines = text.split( '\n' );
+	const result = [];
+	let buffer = [];
+
+	for ( const line of lines ) {
+		const linked = LINKED_IMAGE_REGEX.exec( line );
+		if ( linked ) {
+			if ( buffer.length ) {
+				result.push( { type: 'text', content: buffer.join( '\n' ) } );
+				buffer = [];
+			}
+			result.push( { type: 'image', alt: linked[ 1 ], url: linked[ 2 ], href: linked[ 3 ] } );
+			continue;
+		}
+
+		const plain = PLAIN_IMAGE_REGEX.exec( line );
+		if ( plain ) {
+			if ( buffer.length ) {
+				result.push( { type: 'text', content: buffer.join( '\n' ) } );
+				buffer = [];
+			}
+			result.push( { type: 'image', alt: plain[ 1 ], url: plain[ 2 ] } );
+			continue;
+		}
+
+		buffer.push( line );
+	}
+
+	if ( buffer.length ) {
+		result.push( { type: 'text', content: buffer.join( '\n' ) } );
+	}
+
+	return result;
+}
+
+/**
+ * Parse plain text and extract :::type ... ::: blocks and image lines.
+ *
+ * Returns an array of segments:
+ *   { type: 'text',    content: '...' }
+ *   { type: 'image',   alt: '...', url: '...', href?: '...' }
+ *   { type: 'callout', calloutType: '...', content: '...', innerSegments: [...] }
  *
  * @param {string} text Plain text to parse
  * @return {Array} Parsed segments
@@ -29,41 +89,38 @@ export function parseNotation( text ) {
 
 	while ( ( match = regex.exec( normalized ) ) !== null ) {
 		if ( match.index > lastIndex ) {
-			segments.push( {
-				type: 'text',
-				content: normalized.slice( lastIndex, match.index ),
-			} );
+			segments.push(
+				...splitTextByImages( normalized.slice( lastIndex, match.index ) )
+			);
 		}
 
 		segments.push( {
 			type: 'callout',
 			calloutType: match[ 1 ],
 			content: match[ 2 ],
+			innerSegments: splitTextByImages( match[ 2 ] ),
 		} );
 
 		lastIndex = match.index + match[ 0 ].length;
 	}
 
 	if ( lastIndex < normalized.length ) {
-		segments.push( {
-			type: 'text',
-			content: normalized.slice( lastIndex ),
-		} );
+		segments.push( ...splitTextByImages( normalized.slice( lastIndex ) ) );
 	}
 
 	return segments;
 }
 
 /**
- * Check if text contains any callout notation.
+ * Check if text contains any supported notation (callout blocks or image lines).
  *
  * @param {string} text Plain text to check
  * @return {boolean} True if notation is found
  */
 export function hasNotation( text ) {
 	const typePattern = CALLOUT_TYPES.join( '|' );
-	const regex = new RegExp( `^:::(${ typePattern })\\s*$`, 'm' );
-	return regex.test( text );
+	const calloutRegex = new RegExp( `^:::(${ typePattern })\\s*$`, 'm' );
+	return calloutRegex.test( text ) || /^!\[/m.test( text );
 }
 
 export { CALLOUT_TYPES };
