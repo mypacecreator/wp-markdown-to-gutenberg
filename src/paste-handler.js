@@ -12,6 +12,7 @@ function imageSegmentToBlock( segment ) {
 	const attrs = { url: segment.url, alt: segment.alt };
 	if ( segment.href ) {
 		attrs.href = segment.href;
+		attrs.linkDestination = 'custom';
 	}
 	return createBlock( 'core/image', attrs );
 }
