@@ -120,7 +120,7 @@ export function parseNotation( text ) {
 export function hasNotation( text ) {
 	const typePattern = CALLOUT_TYPES.join( '|' );
 	const calloutRegex = new RegExp( `^:::(${ typePattern })\\s*$`, 'm' );
-	return calloutRegex.test( text ) || /^!\[/m.test( text ) || /^\[!\[/m.test( text );
+	return calloutRegex.test( text ) || PLAIN_IMAGE_REGEX.test( text ) || LINKED_IMAGE_REGEX.test( text );
 }
 
 export { CALLOUT_TYPES };
