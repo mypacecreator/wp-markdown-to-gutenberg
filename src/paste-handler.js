@@ -95,6 +95,7 @@ function onPaste( event ) {
 			for ( const inner of segment.innerSegments ) {
 				if ( inner.type === 'image' ) {
 					innerBlocks.push( imageSegmentToBlock( inner ) );
+					// TODO: button notation inside callout inner segments is not yet supported
 				} else if ( inner.content.trim() ) {
 					const converted = pasteHandler( {
 						plainText: inner.content,
