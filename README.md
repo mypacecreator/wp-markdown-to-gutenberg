@@ -50,6 +50,20 @@
 
 ---
 
+### Visual Link Preview（`visual-link-preview/link`）
+
+[Visual Link Preview](https://wordpress.org/plugins/visual-link-preview/) プラグインのブロックを生成する。
+
+```
+[embed](https://example.com/article)
+```
+
+- URLのみ指定。タイトル・サムネイル・概要はプラグインがエディター上で自動取得する
+- デフォルト値: `nofollow: false`、`new_tab: true`
+- Visual Link Preview プラグインが未有効の場合は `core/paragraph` にリンクとしてフォールバック
+
+---
+
 ### ボタンブロック（`core/buttons` > `core/button`）
 
 ```
