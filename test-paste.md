@@ -62,6 +62,46 @@
 
 ---
 
+## メディアとテキストブロック（実装済み）
+
+### 基本形（左配置・50%幅）
+
+:::media-text
+![サンプル画像](https://example.com/sample.jpg)
+
+これはメディアとテキストブロックの基本形です。
+**太字**やリストも使えます。
+
+- 項目A
+- 項目B
+:::
+
+### 右配置
+
+:::media-text right
+![右配置の画像](https://example.com/right.jpg)
+
+メディアが右側に配置されます。テキストは左側に表示されます。
+:::
+
+### 右配置・40%幅
+
+:::media-text right 40%
+![カスタム幅](https://example.com/narrow.jpg)
+
+メディア幅を40%に指定した例です。テキスト側が60%になります。
+:::
+
+### リンク付き画像
+
+:::media-text
+[![クリック可能](https://example.com/linked.jpg)](https://example.com/destination)
+
+画像にリンクが設定されたメディアとテキストブロックです。
+:::
+
+---
+
 ## ボタンブロック（正式版）
 
 [btn](https://example.com/apply) 申し込む

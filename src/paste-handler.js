@@ -48,7 +48,10 @@ function onPaste( event ) {
 	console.log( '[WPMTG] Parsed segments:', segments );
 
 	const hasActionable = segments.some(
-		( s ) => s.type === 'callout' || s.type === 'image'
+		( s ) =>
+			s.type === 'callout' ||
+			s.type === 'image' ||
+			s.type === 'media-text'
 	);
 	if ( ! hasActionable ) {
 		return;
@@ -95,6 +98,45 @@ function onPaste( event ) {
 			);
 
 			allBlocks.push( groupBlock );
+		} else if ( segment.type === 'media-text' ) {
+			const innerBlocks = [];
+
+			for ( const inner of segment.innerSegments ) {
+				if ( inner.type === 'image' ) {
+					innerBlocks.push( imageSegmentToBlock( inner ) );
+				} else if ( inner.content.trim() ) {
+					const converted = pasteHandler( {
+						plainText: inner.content,
+						mode: 'BLOCKS',
+					} );
+					if ( Array.isArray( converted ) ) {
+						innerBlocks.push( ...converted );
+					}
+				}
+			}
+
+			const mediaAttrs = {
+				mediaType: 'image',
+				mediaPosition: segment.mediaPosition,
+				mediaWidth: segment.mediaWidth,
+			};
+
+			if ( segment.imageSegment ) {
+				mediaAttrs.mediaUrl = segment.imageSegment.url;
+				mediaAttrs.mediaAlt = segment.imageSegment.alt || '';
+
+				if ( segment.imageSegment.href ) {
+					mediaAttrs.href = segment.imageSegment.href;
+					mediaAttrs.linkDestination = 'custom';
+				}
+			}
+
+			// eslint-disable-next-line no-console
+			console.log( '[WPMTG] Media-text block:', mediaAttrs, innerBlocks );
+
+			allBlocks.push(
+				createBlock( 'core/media-text', mediaAttrs, innerBlocks )
+			);
 		} else if ( segment.content.trim() ) {
 			const normalBlocks = pasteHandler( {
 				plainText: segment.content,
