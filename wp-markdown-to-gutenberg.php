@@ -27,7 +27,7 @@ add_action( 'enqueue_block_editor_assets', function () {
 
 	$json_path     = __DIR__ . '/shorthand-map.json';
 	$shorthand_map = [];
-	if ( file_exists( $json_path ) ) {
+	if ( is_readable( $json_path ) ) {
 		$raw     = file_get_contents( $json_path );
 		$decoded = json_decode( $raw, true );
 		if ( is_array( $decoded ) ) {

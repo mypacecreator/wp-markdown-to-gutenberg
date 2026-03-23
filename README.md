@@ -19,7 +19,9 @@
 | `:::vk-group-alert-info` | `is-style-vk-group-alert-info` |
 | `:::vk-group-alert-warning` | `is-style-vk-group-alert-warning` |
 | `:::vk-group-alert-success` | `is-style-vk-group-alert-success` |
-| `:::任意のスタイル名` | `is-style-任意のスタイル名` |
+| `:::my-custom-style` | `is-style-my-custom-style` |
+
+タイプ文字列には英字で始まる英数字・ハイフン・アンダースコア（`[a-zA-Z][a-zA-Z0-9_-]*`）が使用可能。
 
 #### 省略記法
 
