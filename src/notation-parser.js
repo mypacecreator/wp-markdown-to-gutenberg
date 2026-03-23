@@ -43,7 +43,7 @@ function splitTextByImages( text ) {
 				result.push( { type: 'text', content: buffer.join( '\n' ) } );
 				buffer = [];
 			}
-			result.push( { type: 'embed', url: embed[ 1 ] } );
+			result.push( { type: 'embed', url: embed[ 1 ].trim() } );
 			continue;
 		}
 
@@ -127,7 +127,7 @@ export function parseNotation( text ) {
 }
 
 /**
- * Check if text contains any supported notation (callout blocks or image lines).
+ * Check if text contains any supported notation (callout blocks, image lines, or embed links).
  *
  * @param {string} text Plain text to check
  * @return {boolean} True if notation is found
