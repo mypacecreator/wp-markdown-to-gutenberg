@@ -2,6 +2,10 @@ import { pasteHandler, createBlock } from '@wordpress/blocks';
 import { dispatch } from '@wordpress/data';
 import { parseNotation, hasNotation } from './notation-parser';
 
+const shorthandMap = ( typeof window !== 'undefined'
+	&& window.wpmtgConfig
+	&& window.wpmtgConfig.shorthandMap ) || {};
+
 /**
  * Convert an image segment to a core/image block.
  *
@@ -42,7 +46,7 @@ function onPaste( event ) {
 		return;
 	}
 
-	const segments = parseNotation( plainText );
+	const segments = parseNotation( plainText, shorthandMap );
 
 	// eslint-disable-next-line no-console
 	console.log( '[WPMTG] Parsed segments:', segments );

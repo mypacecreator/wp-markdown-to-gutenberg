@@ -1,28 +1,4 @@
 /**
- * Supported callout types. Add entries here to support new types.
- */
-const CALLOUT_TYPES = [ 'vk-group-alert-info', 'vk-group-alert-warning', 'vk-group-alert-success' ];
-
-/**
- * Shorthand notation map.
- * Keys are shorthand names used in :::key notation.
- * Values are the style names applied as is-style-{value}.
- *
- * Example: :::info  →  is-style-comp-info
- */
-const SHORTHAND_MAP = {
-	info: 'comp-info',
-	warning: 'comp-warning',
-	success: 'comp-success',
-};
-
-/**
- * All recognized callout type strings for regex matching.
- * Combines full type names and shorthand keys.
- */
-const ALL_CALLOUT_TYPES = [ ...CALLOUT_TYPES, ...Object.keys( SHORTHAND_MAP ) ];
-
-/**
  * Regex for linked image: [![alt](img-url)](link-url)
  */
 const LINKED_IMAGE_REGEX = /^\[!\[([^\]]*)\]\(([^)]+)\)\]\(([^)]+)\)\s*$/m;
@@ -91,15 +67,11 @@ function splitTextByImages( text ) {
  * @param {string} text Plain text to parse
  * @return {Array} Parsed segments
  */
-export function parseNotation( text ) {
+export function parseNotation( text, shorthandMap = {} ) {
 	// Normalize line endings
 	const normalized = text.replace( /\r\n/g, '\n' );
 
-	const typePattern = ALL_CALLOUT_TYPES.join( '|' );
-	const regex = new RegExp(
-		`^:::(${ typePattern })\\s*\\n([\\s\\S]*?)\\n^[ \\t]*:::[ \\t]*$`,
-		'gm'
-	);
+	const regex = /^:::([a-zA-Z][a-zA-Z0-9_-]*)\s*\n([\s\S]*?)\n^[ \t]*:::[ \t]*$/gm;
 
 	const segments = [];
 	let lastIndex = 0;
@@ -113,7 +85,7 @@ export function parseNotation( text ) {
 		}
 
 		const rawType = match[ 1 ];
-		const resolvedType = SHORTHAND_MAP[ rawType ] || rawType;
+		const resolvedType = shorthandMap[ rawType ] || rawType;
 
 		segments.push( {
 			type: 'callout',
@@ -139,9 +111,6 @@ export function parseNotation( text ) {
  * @return {boolean} True if notation is found
  */
 export function hasNotation( text ) {
-	const typePattern = ALL_CALLOUT_TYPES.join( '|' );
-	const calloutRegex = new RegExp( `^:::(${ typePattern })\\s*$`, 'm' );
+	const calloutRegex = /^:::([a-zA-Z][a-zA-Z0-9_-]*)\s*$/m;
 	return calloutRegex.test( text ) || PLAIN_IMAGE_REGEX.test( text ) || LINKED_IMAGE_REGEX.test( text );
 }
-
-export { CALLOUT_TYPES, SHORTHAND_MAP };

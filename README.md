@@ -12,10 +12,10 @@
 :::
 ```
 
-記法のタイプ文字列がそのまま `is-style-{type}` の className になる。
+`:::` の後に続くタイプ文字列がそのまま `is-style-{type}` の className になる。ホワイトリストはなく、対応するブロックスタイルが登録されていれば任意のスタイル名を指定可能。
 
-| 記法 | 適用 className |
-|-----|---------------|
+| 記法例 | 適用 className |
+|-------|---------------|
 | `:::vk-group-alert-info` | `is-style-vk-group-alert-info` |
 | `:::vk-group-alert-warning` | `is-style-vk-group-alert-warning` |
 | `:::vk-group-alert-success` | `is-style-vk-group-alert-success` |
@@ -23,7 +23,7 @@
 
 #### 省略記法
 
-よく使うブロックスタイルは省略記法でも指定できる。省略記法は `src/notation-parser.js` の `SHORTHAND_MAP` で定義されており、エントリの追加・変更で簡単にカスタマイズ可能。
+よく使うブロックスタイルは省略記法でも指定できる。省略記法はプラグインルートの `shorthand-map.json` で定義されており、ビルド不要で追加・変更が可能。
 
 ```
 :::info
@@ -42,21 +42,20 @@
 
 #### 省略記法の追加・変更方法
 
-`src/notation-parser.js` の先頭付近にある `SHORTHAND_MAP` を編集し、`npm run build` を実行する。
+プラグインルートの `shorthand-map.json` を編集する。**ビルド不要**（ページリロードで即反映）。
 
-```js
-// src/notation-parser.js
-const SHORTHAND_MAP = {
-    info: 'comp-info',       // :::info → is-style-comp-info
-    warning: 'comp-warning', // :::warning → is-style-comp-warning
-    success: 'comp-success', // 追加・削除・変更はここだけ
-};
+```json
+{
+  "info": "comp-info",
+  "warning": "comp-warning",
+  "success": "comp-success"
+}
 ```
 
 - キー：記法で使う省略名（`:::` の直後に書く文字列）
 - 値：適用される `is-style-{値}` の `{値}` 部分
 - エントリを追加するだけで新しい省略記法が有効になる
-- 編集後は `npm run build` でビルドし直す
+- ファイルが存在しない・JSON が不正な場合は省略記法が無効になるだけで、フルネーム記法は正常動作する
 
 ---
 
