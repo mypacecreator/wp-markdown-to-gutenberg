@@ -26,12 +26,17 @@ function imageSegmentToBlock( segment ) {
  */
 function embedSegmentToBlock( segment ) {
 	if ( ! getBlockType( 'visual-link-preview/link' ) ) {
+		const escapedUrl = segment.url
+			.replace( /&/g, '&amp;' )
+			.replace( /"/g, '&quot;' )
+			.replace( /</g, '&lt;' )
+			.replace( />/g, '&gt;' );
 		return createBlock( 'core/paragraph', {
-			content: `<a href="${ segment.url }">${ segment.url }</a>`,
+			content: `<a href="${ escapedUrl }">${ escapedUrl }</a>`,
 		} );
 	}
 
-	const encoded = btoa( JSON.stringify( {
+	const encoded = btoa( unescape( encodeURIComponent( JSON.stringify( {
 		type: 'external',
 		post: 0,
 		post_label: '',
@@ -45,7 +50,7 @@ function embedSegmentToBlock( segment ) {
 		image_id: -1,
 		image_url: '',
 		custom_class: 'wp-block-visual-link-preview-link',
-	} ) );
+	} ) ) ) );
 
 	return createBlock( 'visual-link-preview/link', {
 		url: segment.url,

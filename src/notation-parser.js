@@ -19,13 +19,14 @@ const PLAIN_IMAGE_REGEX = /^!\[([^\]]*)\]\(([^)]+)\)\s*$/m;
 const EMBED_REGEX = /^\[embed\]\(([^)]+)\)\s*$/m;
 
 /**
- * Split a text string into segments, extracting standalone image lines.
+ * Split a text string into segments, extracting standalone image and embed lines.
  *
  * Returns an array of segments:
  *   { type: 'text',  content: '...' }
  *   { type: 'image', alt: '...', url: '...', href?: '...' }
+ *   { type: 'embed', url: '...' }
  *
- * Pattern 2 (linked image) is evaluated before Pattern 1 (plain image).
+ * Embed is evaluated before linked image, which is evaluated before plain image.
  *
  * @param {string} text Plain text to parse
  * @return {Array} Parsed segments
