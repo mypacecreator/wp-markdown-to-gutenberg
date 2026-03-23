@@ -40,6 +40,24 @@
 - 内側のマークダウンは段落・見出し・リストなどの標準ブロックに自動変換
 - 閉じタグ `:::` の前にタブ・スペースがあっても認識される
 
+#### 省略記法の追加・変更方法
+
+`src/notation-parser.js` の先頭付近にある `SHORTHAND_MAP` を編集し、`npm run build` を実行する。
+
+```js
+// src/notation-parser.js
+const SHORTHAND_MAP = {
+    info: 'comp-info',       // :::info → is-style-comp-info
+    warning: 'comp-warning', // :::warning → is-style-comp-warning
+    success: 'comp-success', // 追加・削除・変更はここだけ
+};
+```
+
+- キー：記法で使う省略名（`:::` の直後に書く文字列）
+- 値：適用される `is-style-{値}` の `{値}` 部分
+- エントリを追加するだけで新しい省略記法が有効になる
+- 編集後は `npm run build` でビルドし直す
+
 ---
 
 ### 画像ブロック（`core/image`）

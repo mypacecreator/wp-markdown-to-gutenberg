@@ -31,7 +31,33 @@
 
 ## コールアウトブロック（実装済み）
 
-### INFO
+### 省略記法 — INFO
+
+:::info
+## お知らせ（省略記法）
+
+これは `:::info` 省略記法のテストです。`is-style-comp-info` が適用されます。
+:::
+
+### 省略記法 — WARNING
+
+:::warning
+⚠️ 注意（省略記法）
+
+`:::warning` → `is-style-comp-warning` に変換されます。
+:::
+
+### 省略記法 — SUCCESS
+
+:::success
+✅ 完了（省略記法）
+
+`:::success` → `is-style-comp-success` に変換されます。
+:::
+
+---
+
+### フルネーム記法 — INFO
 
 :::vk-group-alert-info
 ## お知らせ
@@ -44,7 +70,7 @@
 **太字テキスト**も正しく変換されます。
 :::
 
-### WARNING
+### フルネーム記法 — WARNING
 
 :::vk-group-alert-warning
 ⚠️ 注意事項
@@ -52,7 +78,7 @@
 この操作は取り消せません。実行前に必ずバックアップを取ってください。
 :::
 
-### SUCCESS
+### フルネーム記法 — SUCCESS
 
 :::vk-group-alert-success
 ✅ 完了しました
