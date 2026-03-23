@@ -21,6 +21,22 @@
 | `:::vk-group-alert-success` | `is-style-vk-group-alert-success` |
 | `:::任意のスタイル名` | `is-style-任意のスタイル名` |
 
+#### 省略記法
+
+よく使うブロックスタイルは省略記法でも指定できる。省略記法は `src/notation-parser.js` の `SHORTHAND_MAP` で定義されており、エントリの追加・変更で簡単にカスタマイズ可能。
+
+```
+:::info
+テキスト
+:::
+```
+
+| 省略記法 | 展開後の className |
+|---------|-------------------|
+| `:::info` | `is-style-comp-info` |
+| `:::warning` | `is-style-comp-warning` |
+| `:::success` | `is-style-comp-success` |
+
 - 内側のマークダウンは段落・見出し・リストなどの標準ブロックに自動変換
 - 閉じタグ `:::` の前にタブ・スペースがあっても認識される
 

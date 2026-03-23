@@ -4,6 +4,25 @@
 const CALLOUT_TYPES = [ 'vk-group-alert-info', 'vk-group-alert-warning', 'vk-group-alert-success' ];
 
 /**
+ * Shorthand notation map.
+ * Keys are shorthand names used in :::key notation.
+ * Values are the style names applied as is-style-{value}.
+ *
+ * Example: :::info  →  is-style-comp-info
+ */
+const SHORTHAND_MAP = {
+	info: 'comp-info',
+	warning: 'comp-warning',
+	success: 'comp-success',
+};
+
+/**
+ * All recognized callout type strings for regex matching.
+ * Combines full type names and shorthand keys.
+ */
+const ALL_CALLOUT_TYPES = [ ...CALLOUT_TYPES, ...Object.keys( SHORTHAND_MAP ) ];
+
+/**
  * Regex for linked image: [![alt](img-url)](link-url)
  */
 const LINKED_IMAGE_REGEX = /^\[!\[([^\]]*)\]\(([^)]+)\)\]\(([^)]+)\)\s*$/m;
@@ -76,7 +95,7 @@ export function parseNotation( text ) {
 	// Normalize line endings
 	const normalized = text.replace( /\r\n/g, '\n' );
 
-	const typePattern = CALLOUT_TYPES.join( '|' );
+	const typePattern = ALL_CALLOUT_TYPES.join( '|' );
 	const regex = new RegExp(
 		`^:::(${ typePattern })\\s*\\n([\\s\\S]*?)\\n^[ \\t]*:::[ \\t]*$`,
 		'gm'
@@ -93,9 +112,12 @@ export function parseNotation( text ) {
 			);
 		}
 
+		const rawType = match[ 1 ];
+		const resolvedType = SHORTHAND_MAP[ rawType ] || rawType;
+
 		segments.push( {
 			type: 'callout',
-			calloutType: match[ 1 ],
+			calloutType: resolvedType,
 			content: match[ 2 ],
 			innerSegments: splitTextByImages( match[ 2 ] ),
 		} );
@@ -117,9 +139,9 @@ export function parseNotation( text ) {
  * @return {boolean} True if notation is found
  */
 export function hasNotation( text ) {
-	const typePattern = CALLOUT_TYPES.join( '|' );
+	const typePattern = ALL_CALLOUT_TYPES.join( '|' );
 	const calloutRegex = new RegExp( `^:::(${ typePattern })\\s*$`, 'm' );
 	return calloutRegex.test( text ) || PLAIN_IMAGE_REGEX.test( text ) || LINKED_IMAGE_REGEX.test( text );
 }
 
-export { CALLOUT_TYPES };
+export { CALLOUT_TYPES, SHORTHAND_MAP };
