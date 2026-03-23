@@ -1,6 +1,6 @@
 import { pasteHandler, createBlock } from '@wordpress/blocks';
 import { dispatch } from '@wordpress/data';
-import { parseNotation, hasNotation } from './notation-parser';
+import { parseNotation, hasNotation, splitTextByImages } from './notation-parser';
 
 /**
  * Convert an image segment to a core/image block.
@@ -15,6 +15,30 @@ function imageSegmentToBlock( segment ) {
 		attrs.linkDestination = 'custom';
 	}
 	return createBlock( 'core/image', attrs );
+}
+
+/**
+ * Convert an array of inner segments (from notation-parser) into blocks.
+ *
+ * @param {Array} innerSegments  Parsed segments (image or text)
+ * @return {Array} Gutenberg blocks
+ */
+function innerSegmentsToBlocks( innerSegments ) {
+	const blocks = [];
+	for ( const inner of innerSegments ) {
+		if ( inner.type === 'image' ) {
+			blocks.push( imageSegmentToBlock( inner ) );
+		} else if ( inner.content.trim() ) {
+			const converted = pasteHandler( {
+				plainText: inner.content,
+				mode: 'BLOCKS',
+			} );
+			if ( Array.isArray( converted ) ) {
+				blocks.push( ...converted );
+			}
+		}
+	}
+	return blocks;
 }
 
 /**
@@ -70,21 +94,7 @@ function onPaste( event ) {
 		if ( segment.type === 'image' ) {
 			allBlocks.push( imageSegmentToBlock( segment ) );
 		} else if ( segment.type === 'callout' ) {
-			const innerBlocks = [];
-
-			for ( const inner of segment.innerSegments ) {
-				if ( inner.type === 'image' ) {
-					innerBlocks.push( imageSegmentToBlock( inner ) );
-				} else if ( inner.content.trim() ) {
-					const converted = pasteHandler( {
-						plainText: inner.content,
-						mode: 'BLOCKS',
-					} );
-					if ( Array.isArray( converted ) ) {
-						innerBlocks.push( ...converted );
-					}
-				}
-			}
+			const innerBlocks = innerSegmentsToBlocks( segment.innerSegments );
 
 			// eslint-disable-next-line no-console
 			console.log( '[WPMTG] Inner blocks:', innerBlocks );
@@ -99,21 +109,16 @@ function onPaste( event ) {
 
 			allBlocks.push( groupBlock );
 		} else if ( segment.type === 'media-text' ) {
-			const innerBlocks = [];
-
-			for ( const inner of segment.innerSegments ) {
-				if ( inner.type === 'image' ) {
-					innerBlocks.push( imageSegmentToBlock( inner ) );
-				} else if ( inner.content.trim() ) {
-					const converted = pasteHandler( {
-						plainText: inner.content,
-						mode: 'BLOCKS',
-					} );
-					if ( Array.isArray( converted ) ) {
-						innerBlocks.push( ...converted );
-					}
-				}
+			if ( ! segment.imageSegment ) {
+				// No image found — fall back to normal text handling
+				const fallbackBlocks = innerSegmentsToBlocks(
+					splitTextByImages( segment.innerSegments.map( ( s ) => s.content || '' ).join( '\n' ) )
+				);
+				allBlocks.push( ...fallbackBlocks );
+				continue;
 			}
+
+			const innerBlocks = innerSegmentsToBlocks( segment.innerSegments );
 
 			const mediaAttrs = {
 				mediaType: 'image',

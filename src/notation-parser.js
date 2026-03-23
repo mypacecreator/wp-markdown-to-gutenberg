@@ -62,15 +62,15 @@ function splitTextByImages( text ) {
 }
 
 /**
- * Regex for :::media-text blocks with optional position and width.
+ * Source pattern for :::media-text blocks with optional position and width.
  *
  * :::media-text [right] [40%]
  * ![alt](url)
  * Text content
  * :::
  */
-const MEDIA_TEXT_REGEX =
-	/^:::media-text(?:\s+(right))?(?:\s+(\d+)%)?\s*\n([\s\S]*?)\n^[ \t]*:::[ \t]*$/gm;
+const MEDIA_TEXT_PATTERN =
+	'^:::media-text(?:\\s+(right))?(?:\\s+(\\d+)%)?\\s*\\n([\\s\\S]*?)\\n^[ \\t]*:::[ \\t]*$';
 
 /**
  * Extract the first image segment from an array of segments parsed by
@@ -133,7 +133,7 @@ export function parseNotation( text ) {
 	}
 
 	// Media-text blocks
-	const mediaTextRegex = new RegExp( MEDIA_TEXT_REGEX.source, 'gm' );
+	const mediaTextRegex = new RegExp( MEDIA_TEXT_PATTERN, 'gm' );
 	while ( ( m = mediaTextRegex.exec( normalized ) ) !== null ) {
 		matches.push( {
 			kind: 'media-text',
@@ -180,7 +180,9 @@ export function parseNotation( text ) {
 			segments.push( {
 				type: 'media-text',
 				mediaPosition: mt.position || 'left',
-				mediaWidth: mt.width ? parseInt( mt.width, 10 ) : 50,
+				mediaWidth: mt.width
+					? Math.max( 10, Math.min( 90, parseInt( mt.width, 10 ) ) )
+					: 50,
 				imageSegment: imageSegment || null,
 				innerSegments: rest,
 			} );
@@ -209,4 +211,4 @@ export function hasNotation( text ) {
 	return calloutRegex.test( text ) || mediaTextDetect.test( text ) || PLAIN_IMAGE_REGEX.test( text ) || LINKED_IMAGE_REGEX.test( text );
 }
 
-export { CALLOUT_TYPES };
+export { CALLOUT_TYPES, splitTextByImages };
