@@ -62,6 +62,14 @@
 
 ---
 
+## Visual Link Preview（実装済み）
+
+[embed](https://www.commerce-design.net/tools/comanosuke/)
+
+[embed](https://ja.wikipedia.org/wiki/WordPress)
+
+---
+
 ## ボタンブロック（正式版）
 
 [btn](https://example.com/apply) 申し込む
@@ -99,6 +107,8 @@
 :::
 
 上記コールアウトの後に続く通常テキスト。
+
+[embed](https://example.com/mixed-test)
 
 [btn](https://example.com) ボタンも混在
 

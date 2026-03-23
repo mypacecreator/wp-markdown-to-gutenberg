@@ -14,6 +14,11 @@ const LINKED_IMAGE_REGEX = /^\[!\[([^\]]*)\]\(([^)]+)\)\]\(([^)]+)\)\s*$/m;
 const PLAIN_IMAGE_REGEX = /^!\[([^\]]*)\]\(([^)]+)\)\s*$/m;
 
 /**
+ * Regex for embed (Visual Link Preview): [embed](url)
+ */
+const EMBED_REGEX = /^\[embed\]\(([^)]+)\)\s*$/m;
+
+/**
  * Split a text string into segments, extracting standalone image lines.
  *
  * Returns an array of segments:
@@ -31,6 +36,16 @@ function splitTextByImages( text ) {
 	let buffer = [];
 
 	for ( const line of lines ) {
+		const embed = EMBED_REGEX.exec( line );
+		if ( embed ) {
+			if ( buffer.length ) {
+				result.push( { type: 'text', content: buffer.join( '\n' ) } );
+				buffer = [];
+			}
+			result.push( { type: 'embed', url: embed[ 1 ] } );
+			continue;
+		}
+
 		const linked = LINKED_IMAGE_REGEX.exec( line );
 		if ( linked ) {
 			if ( buffer.length ) {
@@ -119,7 +134,7 @@ export function parseNotation( text ) {
 export function hasNotation( text ) {
 	const typePattern = CALLOUT_TYPES.join( '|' );
 	const calloutRegex = new RegExp( `^:::(${ typePattern })\\s*$`, 'm' );
-	return calloutRegex.test( text ) || PLAIN_IMAGE_REGEX.test( text ) || LINKED_IMAGE_REGEX.test( text );
+	return calloutRegex.test( text ) || EMBED_REGEX.test( text ) || PLAIN_IMAGE_REGEX.test( text ) || LINKED_IMAGE_REGEX.test( text );
 }
 
 export { CALLOUT_TYPES };

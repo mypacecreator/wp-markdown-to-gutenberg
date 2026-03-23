@@ -1,4 +1,4 @@
-import { pasteHandler, createBlock } from '@wordpress/blocks';
+import { pasteHandler, createBlock, getBlockType } from '@wordpress/blocks';
 import { dispatch } from '@wordpress/data';
 import { parseNotation, hasNotation } from './notation-parser';
 
@@ -15,6 +15,48 @@ function imageSegmentToBlock( segment ) {
 		attrs.linkDestination = 'custom';
 	}
 	return createBlock( 'core/image', attrs );
+}
+
+/**
+ * Convert an embed segment to a visual-link-preview/link block.
+ * Falls back to a core/paragraph with a link if the plugin is not active.
+ *
+ * @param {Object} segment  Embed segment with url
+ * @return {Object} visual-link-preview/link or core/paragraph block
+ */
+function embedSegmentToBlock( segment ) {
+	if ( ! getBlockType( 'visual-link-preview/link' ) ) {
+		return createBlock( 'core/paragraph', {
+			content: `<a href="${ segment.url }">${ segment.url }</a>`,
+		} );
+	}
+
+	const encoded = btoa( JSON.stringify( {
+		type: 'external',
+		post: 0,
+		post_label: '',
+		url: segment.url,
+		provider_used: 'microlink',
+		template: 'simple',
+		nofollow: false,
+		new_tab: true,
+		title: '',
+		summary: '',
+		image_id: -1,
+		image_url: '',
+		custom_class: 'wp-block-visual-link-preview-link',
+	} ) );
+
+	return createBlock( 'visual-link-preview/link', {
+		url: segment.url,
+		nofollow: false,
+		new_tab: true,
+		image_id: -1,
+		type: 'external',
+		provider_used: 'microlink',
+		template: 'simple',
+		encoded,
+	} );
 }
 
 /**
@@ -48,7 +90,7 @@ function onPaste( event ) {
 	console.log( '[WPMTG] Parsed segments:', segments );
 
 	const hasActionable = segments.some(
-		( s ) => s.type === 'callout' || s.type === 'image'
+		( s ) => s.type === 'callout' || s.type === 'image' || s.type === 'embed'
 	);
 	if ( ! hasActionable ) {
 		return;
@@ -66,12 +108,16 @@ function onPaste( event ) {
 	for ( const segment of segments ) {
 		if ( segment.type === 'image' ) {
 			allBlocks.push( imageSegmentToBlock( segment ) );
+		} else if ( segment.type === 'embed' ) {
+			allBlocks.push( embedSegmentToBlock( segment ) );
 		} else if ( segment.type === 'callout' ) {
 			const innerBlocks = [];
 
 			for ( const inner of segment.innerSegments ) {
 				if ( inner.type === 'image' ) {
 					innerBlocks.push( imageSegmentToBlock( inner ) );
+				} else if ( inner.type === 'embed' ) {
+					innerBlocks.push( embedSegmentToBlock( inner ) );
 				} else if ( inner.content.trim() ) {
 					const converted = pasteHandler( {
 						plainText: inner.content,
