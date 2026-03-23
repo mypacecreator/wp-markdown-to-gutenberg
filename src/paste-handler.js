@@ -1,6 +1,6 @@
 import { pasteHandler, createBlock } from '@wordpress/blocks';
 import { dispatch } from '@wordpress/data';
-import { parseNotation, hasNotation, splitTextByImages } from './notation-parser';
+import { parseNotation, hasNotation } from './notation-parser';
 
 /**
  * Convert an image segment to a core/image block.
@@ -111,10 +111,7 @@ function onPaste( event ) {
 		} else if ( segment.type === 'media-text' ) {
 			if ( ! segment.imageSegment ) {
 				// No image found — fall back to normal text handling
-				const fallbackBlocks = innerSegmentsToBlocks(
-					splitTextByImages( segment.innerSegments.map( ( s ) => s.content || '' ).join( '\n' ) )
-				);
-				allBlocks.push( ...fallbackBlocks );
+				allBlocks.push( ...innerSegmentsToBlocks( segment.innerSegments ) );
 				continue;
 			}
 

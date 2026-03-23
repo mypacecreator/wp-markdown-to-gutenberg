@@ -211,4 +211,4 @@ export function hasNotation( text ) {
 	return calloutRegex.test( text ) || mediaTextDetect.test( text ) || PLAIN_IMAGE_REGEX.test( text ) || LINKED_IMAGE_REGEX.test( text );
 }
 
-export { CALLOUT_TYPES, splitTextByImages };
+export { CALLOUT_TYPES };
