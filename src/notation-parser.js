@@ -4,6 +4,11 @@
 const CALLOUT_TYPES = [ 'vk-group-alert-info', 'vk-group-alert-warning', 'vk-group-alert-success' ];
 
 /**
+ * Regex for button notation (loose check for hasNotation early return).
+ */
+const BUTTON_NOTATION_REGEX = /^\[btn[ \]]/m;
+
+/**
  * Regex for linked image: [![alt](img-url)](link-url)
  */
 const LINKED_IMAGE_REGEX = /^\[!\[([^\]]*)\]\(([^)]+)\)\]\(([^)]+)\)\s*$/m;
@@ -119,7 +124,12 @@ export function parseNotation( text ) {
 export function hasNotation( text ) {
 	const typePattern = CALLOUT_TYPES.join( '|' );
 	const calloutRegex = new RegExp( `^:::(${ typePattern })\\s*$`, 'm' );
-	return calloutRegex.test( text ) || PLAIN_IMAGE_REGEX.test( text ) || LINKED_IMAGE_REGEX.test( text );
+	return (
+		calloutRegex.test( text ) ||
+		PLAIN_IMAGE_REGEX.test( text ) ||
+		LINKED_IMAGE_REGEX.test( text ) ||
+		BUTTON_NOTATION_REGEX.test( text )
+	);
 }
 
 export { CALLOUT_TYPES };
