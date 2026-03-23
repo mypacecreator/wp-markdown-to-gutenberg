@@ -67,7 +67,7 @@
 ### 基本形（左配置・50%幅）
 
 :::media-text
-![サンプル画像](https://example.com/sample.jpg)
+![サンプル画像](https://placehold.co/600x400/E8F5E9/333?text=Sample)
 
 これはメディアとテキストブロックの基本形です。
 **太字**やリストも使えます。
@@ -79,7 +79,7 @@
 ### 右配置
 
 :::media-text right
-![右配置の画像](https://example.com/right.jpg)
+![右配置の画像](https://placehold.co/600x400/E3F2FD/333?text=Right)
 
 メディアが右側に配置されます。テキストは左側に表示されます。
 :::
@@ -87,7 +87,7 @@
 ### 右配置・40%幅
 
 :::media-text right 40%
-![カスタム幅](https://example.com/narrow.jpg)
+![カスタム幅](https://placehold.co/600x400/FFF3E0/333?text=40%25)
 
 メディア幅を40%に指定した例です。テキスト側が60%になります。
 :::
@@ -95,7 +95,7 @@
 ### リンク付き画像
 
 :::media-text
-[![クリック可能](https://example.com/linked.jpg)](https://example.com/destination)
+[![クリック可能](https://placehold.co/600x400/FCE4EC/333?text=Linked)](https://example.com/destination)
 
 画像にリンクが設定されたメディアとテキストブロックです。
 :::
@@ -103,7 +103,7 @@
 ### 幅のみ指定（左配置・70%幅）
 
 :::media-text 70%
-![幅のみ指定](https://example.com/width-only.jpg)
+![幅のみ指定](https://placehold.co/600x400/F3E5F5/333?text=70%25)
 
 左配置のまま、メディア幅を70%に指定した例です。テキスト側が30%になります。
 :::
@@ -111,7 +111,7 @@
 ### 境界値テスト — 最小幅（10%）
 
 :::media-text 10%
-![最小幅](https://example.com/min-width.jpg)
+![最小幅](https://placehold.co/600x400/E0F7FA/333?text=10%25)
 
 メディア幅の最小値（10%）です。テキスト側が90%になります。
 :::
@@ -119,7 +119,7 @@
 ### 境界値テスト — 最大幅（90%）
 
 :::media-text 90%
-![最大幅](https://example.com/max-width.jpg)
+![最大幅](https://placehold.co/600x400/FFF9C4/333?text=90%25)
 
 メディア幅の最大値（90%）です。テキスト側が10%になります。
 :::
@@ -133,7 +133,7 @@
 ### リッチなテキスト内容（見出し・複数段落・リスト）
 
 :::media-text right 60%
-![リッチコンテンツ](https://example.com/rich.jpg)
+![リッチコンテンツ](https://placehold.co/600x400/D1C4E9/333?text=Rich)
 
 ### テキスト側の見出し
 
@@ -153,7 +153,7 @@ media-text の前に置かれたコールアウトです。
 :::
 
 :::media-text right 30%
-![混在テスト](https://example.com/mixed.jpg)
+![混在テスト](https://placehold.co/600x400/FFCCBC/333?text=Mixed)
 
 コールアウトの直後に配置されたメディアとテキストブロックです。
 :::
