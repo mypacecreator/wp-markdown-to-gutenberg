@@ -34,6 +34,30 @@ function imageSegmentToBlock( segment ) {
 }
 
 /**
+ * Convert an array of inner segments (from notation-parser) into blocks.
+ *
+ * @param {Array} innerSegments  Parsed segments (image or text)
+ * @return {Array} Gutenberg blocks
+ */
+function innerSegmentsToBlocks( innerSegments ) {
+	const blocks = [];
+	for ( const inner of innerSegments ) {
+		if ( inner.type === 'image' ) {
+			blocks.push( imageSegmentToBlock( inner ) );
+		} else if ( inner.content.trim() ) {
+			const converted = pasteHandler( {
+				plainText: inner.content,
+				mode: 'BLOCKS',
+			} );
+			if ( Array.isArray( converted ) ) {
+				blocks.push( ...converted );
+			}
+		}
+	}
+	return blocks;
+}
+
+/**
  * The paste event handler.
  * Intercepts paste containing :::type notation or image lines, converts to
  * group/image blocks, and inserts them via the block editor data store.
@@ -69,7 +93,11 @@ function onPaste( event ) {
 	console.log( '[WPMTG] Parsed segments:', segments );
 
 	const hasActionable = segments.some(
-		( s ) => s.type === 'callout' || s.type === 'image' || s.type === 'button'
+		( s ) =>
+			s.type === 'callout' ||
+			s.type === 'image' ||
+			s.type === 'button' ||
+			s.type === 'media-text'
 	);
 	if ( ! hasActionable ) {
 		return;
@@ -90,22 +118,7 @@ function onPaste( event ) {
 		} else if ( segment.type === 'image' ) {
 			allBlocks.push( imageSegmentToBlock( segment ) );
 		} else if ( segment.type === 'callout' ) {
-			const innerBlocks = [];
-
-			for ( const inner of segment.innerSegments ) {
-				if ( inner.type === 'image' ) {
-					innerBlocks.push( imageSegmentToBlock( inner ) );
-					// TODO: button notation inside callout inner segments is not yet supported
-				} else if ( inner.content.trim() ) {
-					const converted = pasteHandler( {
-						plainText: inner.content,
-						mode: 'BLOCKS',
-					} );
-					if ( Array.isArray( converted ) ) {
-						innerBlocks.push( ...converted );
-					}
-				}
-			}
+			const innerBlocks = innerSegmentsToBlocks( segment.innerSegments );
 
 			// eslint-disable-next-line no-console
 			console.log( '[WPMTG] Inner blocks:', innerBlocks );
@@ -119,6 +132,37 @@ function onPaste( event ) {
 			);
 
 			allBlocks.push( groupBlock );
+		} else if ( segment.type === 'media-text' ) {
+			if ( ! segment.imageSegment ) {
+				// No image found — fall back to normal text handling
+				allBlocks.push( ...innerSegmentsToBlocks( segment.innerSegments ) );
+				continue;
+			}
+
+			const innerBlocks = innerSegmentsToBlocks( segment.innerSegments );
+
+			const mediaAttrs = {
+				mediaType: 'image',
+				mediaPosition: segment.mediaPosition,
+				mediaWidth: segment.mediaWidth,
+			};
+
+			if ( segment.imageSegment ) {
+				mediaAttrs.mediaUrl = segment.imageSegment.url;
+				mediaAttrs.mediaAlt = segment.imageSegment.alt || '';
+
+				if ( segment.imageSegment.href ) {
+					mediaAttrs.href = segment.imageSegment.href;
+					mediaAttrs.linkDestination = 'custom';
+				}
+			}
+
+			// eslint-disable-next-line no-console
+			console.log( '[WPMTG] Media-text block:', mediaAttrs, innerBlocks );
+
+			allBlocks.push(
+				createBlock( 'core/media-text', mediaAttrs, innerBlocks )
+			);
 		} else if ( segment.content.trim() ) {
 			const normalBlocks = pasteHandler( {
 				plainText: segment.content,
