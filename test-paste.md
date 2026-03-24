@@ -211,6 +211,12 @@ media-text の前に置かれたコールアウトです。
 
 [btn primary](https://example.com/apply) 省略記法ボタン
 
+### blue / orange（shorthand-map.json に定義済み）
+
+[btn blue](https://example.com/detail) ブルー立体（省略記法）
+
+[btn orange](https://example.com/detail) オレンジ立体（省略記法）
+
 ---
 
 ## 再利用ブロック（正式版）

@@ -5,5 +5,8 @@
     "warning": "sme-alert-warning",
     "success": "sme-alert-success"
   },
-  "button": {}
+  "button": {
+    "blue": "comp-blue",
+    "orange": "comp-orange"
+  }
 }
