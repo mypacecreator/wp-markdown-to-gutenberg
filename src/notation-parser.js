@@ -4,6 +4,11 @@
 const BUTTON_NOTATION_REGEX = /^\[btn[ \]]/m;
 
 /**
+ * Regex for reuse notation: {{reuse:ID_OR_SLUG}}
+ */
+const REUSE_NOTATION_REGEX = /^\{\{reuse:[\w-]+\}\}$/m;
+
+/**
  * Regex for more notation: :::more:::
  */
 const MORE_NOTATION_REGEX = /^:::more:::[ \t\r]*$/m;
@@ -249,6 +254,7 @@ export function hasNotation( text ) {
 		EMBED_REGEX.test( text ) ||
 		PLAIN_IMAGE_REGEX.test( text ) ||
 		LINKED_IMAGE_REGEX.test( text ) ||
-		BUTTON_NOTATION_REGEX.test( text )
+		BUTTON_NOTATION_REGEX.test( text ) ||
+		REUSE_NOTATION_REGEX.test( text )
 	);
 }

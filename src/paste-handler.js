@@ -1,5 +1,5 @@
 import { pasteHandler, createBlock, getBlockType } from '@wordpress/blocks';
-import { dispatch } from '@wordpress/data';
+import { dispatch, select } from '@wordpress/data';
 import { parseNotation, hasNotation } from './notation-parser';
 import { parseLineSegments } from './line-parser';
 
@@ -177,7 +177,8 @@ function onPaste( event ) {
 			s.type === 'embed' ||
 			s.type === 'button' ||
 			s.type === 'media-text' ||
-			s.type === 'more'
+			s.type === 'more' ||
+		s.type === 'reuse'
 	);
 	if ( ! hasActionable ) {
 		return;
@@ -247,6 +248,19 @@ function onPaste( event ) {
 			allBlocks.push(
 				createBlock( 'core/media-text', mediaAttrs, innerBlocks )
 			);
+		} else if ( segment.type === 'reuse' ) {
+			let ref = segment.id;
+			if ( ref === null && segment.slug ) {
+				const wpBlocks =
+					select( 'core' ).getEntityRecords( 'postType', 'wp_block', {
+						per_page: -1,
+					} ) || [];
+				const matched = wpBlocks.find( ( b ) => b.slug === segment.slug );
+				ref = matched ? matched.id : null;
+			}
+			if ( ref !== null ) {
+				allBlocks.push( createBlock( 'core/block', { ref } ) );
+			}
 		} else if ( segment.content.trim() ) {
 			const normalBlocks = pasteHandler( {
 				plainText: segment.content,
@@ -287,6 +301,11 @@ function attachToDocument( doc, label ) {
  * it appears and its contentDocument is accessible.
  */
 export function installPasteHandler() {
+	// Prefetch all reusable blocks (wp_block) so slug resolution works synchronously
+	// when the user pastes. getEntityRecords triggers a REST API fetch in the background
+	// and caches results in the WordPress data store.
+	select( 'core' ).getEntityRecords( 'postType', 'wp_block', { per_page: -1 } );
+
 	// Fallback: attach to parent document (works if editor is NOT in iframe)
 	attachToDocument( document, 'parent document' );
 

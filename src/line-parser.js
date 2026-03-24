@@ -5,6 +5,12 @@
 const BUTTON_REGEX = /^\[btn( [\w-]+)?\]\(([^)]+)\)\s+(.+)$/;
 
 /**
+ * Regex for reuse notation: {{reuse:ID_OR_SLUG}}
+ * Captures: [1] numeric ID or slug (word chars and hyphens)
+ */
+const REUSE_REGEX = /^\{\{reuse:([\w-]+)\}\}$/;
+
+/**
  * Parse a text string line-by-line, extracting button notation lines.
  *
  * Returns an array of segments:
@@ -40,6 +46,19 @@ export function parseLineSegments( text, shorthandMap = {} ) {
 				url: btnMatch[ 2 ],
 				label: btnMatch[ 3 ],
 				className: resolvedStyle ? `is-style-${ resolvedStyle }` : '',
+			} );
+			continue;
+		}
+
+		const reuseMatch = REUSE_REGEX.exec( line );
+		if ( reuseMatch ) {
+			flushBuffer();
+			const idOrSlug = reuseMatch[ 1 ];
+			const numericId = /^\d+$/.test( idOrSlug ) ? parseInt( idOrSlug, 10 ) : null;
+			result.push( {
+				type: 'reuse',
+				id: numericId,
+				slug: numericId === null ? idOrSlug : null,
 			} );
 			continue;
 		}
