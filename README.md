@@ -180,10 +180,10 @@ WordPressの再利用ブロックを投稿IDで呼び出す。
 ### 続きを読む（`core/more`）
 
 ```
-<!--more-->
+:::more:::
 ```
 
-標準のWordPress「続きを読む」タグをそのまま使用。
+独自の `:::more:::` 記法を WordPress の「続きを読む」ブロック（`core/more`）に変換。
 
 ---
 
