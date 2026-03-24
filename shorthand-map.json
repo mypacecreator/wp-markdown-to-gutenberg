@@ -1,0 +1,12 @@
+{
+  "callout": {
+    "info": "comp-info",
+    "related": "comp-related",
+    "warning": "sme-alert-warning",
+    "success": "sme-alert-success"
+  },
+  "button": {
+    "blue": "comp-blue",
+    "orange": "comp-orange"
+  }
+}

@@ -1,7 +1,6 @@
 # WP Markdown to Gutenberg — ペーストテスト用ダミー原稿
 
 > このファイルの全文をコピーしてGutenbergエディターに貼り付け、各記法が正しく変換されることを確認してください。
-> 現時点でプラグインが対応済みなのは「コールアウト」のみです。他の記法は正式版実装後に変換されます。
 
 ---
 
@@ -19,21 +18,55 @@
 
 ---
 
-## 続きを読む（正式版）
+## 続きを読むブロック（実装済み）
 
-記事の要約ここまで。
+記事の前の段落。
 
-<!--more-->
+:::more:::
 
-続きの本文はここから。
+記事の後の段落。
 
 ---
 
 ## コールアウトブロック（実装済み）
 
-### INFO
+### 省略記法 — INFO
 
-:::vk-group-alert-info
+:::info
+## お知らせ（省略記法）
+
+これは `:::info` 省略記法のテストです。`is-style-comp-info` が適用されます。
+:::
+
+### 省略記法 — WARNING
+
+:::warning
+⚠️ 注意（省略記法）
+
+`:::warning` → `is-style-sme-alert-warning` に変換されます。
+:::
+
+### 省略記法 — SUCCESS
+
+:::success
+✅ 完了（省略記法）
+
+`:::success` → `is-style-sme-alert-success` に変換されます。
+:::
+	
+### 省略記法 — related
+
+:::related
+▶関連記事
+
+`:::related` → `is-style-comp-related` に変換されます。
+:::
+
+---
+
+### フルネーム記法 — INFO
+
+:::comp-info
 ## お知らせ
 
 これは情報ブロックです。
@@ -44,17 +77,17 @@
 **太字テキスト**も正しく変換されます。
 :::
 
-### WARNING
+### フルネーム記法 — WARNING
 
-:::vk-group-alert-warning
+:::sme-alert-warning
 ⚠️ 注意事項
 
 この操作は取り消せません。実行前に必ずバックアップを取ってください。
 :::
 
-### SUCCESS
+### フルネーム記法 — SUCCESS
 
-:::vk-group-alert-success
+:::sme-alert-success
 ✅ 完了しました
 
 設定が正常に保存されました。変更は即時反映されます。
@@ -70,11 +103,127 @@
 
 ---
 
+## メディアとテキストブロック（実装済み）
+
+### 基本形（左配置・50%幅）
+
+:::media-text
+![サンプル画像](https://placehold.co/600x400/E8F5E9/333?text=Sample)
+
+これはメディアとテキストブロックの基本形です。
+**太字**やリストも使えます。
+
+- 項目A
+- 項目B
+:::
+
+### 右配置
+
+:::media-text right
+![右配置の画像](https://placehold.co/600x400/E3F2FD/333?text=Right)
+
+メディアが右側に配置されます。テキストは左側に表示されます。
+:::
+
+### 右配置・40%幅
+
+:::media-text right 40%
+![カスタム幅](https://placehold.co/600x400/FFF3E0/333?text=40%25)
+
+メディア幅を40%に指定した例です。テキスト側が60%になります。
+:::
+
+### リンク付き画像
+
+:::media-text
+[![クリック可能](https://placehold.co/600x400/FCE4EC/333?text=Linked)](https://example.com/destination)
+
+画像にリンクが設定されたメディアとテキストブロックです。
+:::
+
+### 幅のみ指定（左配置・70%幅）
+
+:::media-text 70%
+![幅のみ指定](https://placehold.co/600x400/F3E5F5/333?text=70%25)
+
+左配置のまま、メディア幅を70%に指定した例です。テキスト側が30%になります。
+:::
+
+### 境界値テスト — 最小幅（15%）
+
+:::media-text 15%
+![最小幅](https://placehold.co/600x400/E0F7FA/333?text=15%25)
+
+メディア幅の最小値（15%）です。テキスト側が85%になります。
+:::
+
+### 境界値テスト — 最大幅（85%）
+
+:::media-text 85%
+![最大幅](https://placehold.co/600x400/FFF9C4/333?text=85%25)
+
+メディア幅の最大値（85%）です。テキスト側が15%になります。
+:::
+
+### 画像なし（フォールバック確認）
+
+:::media-text
+テキストのみで画像がない場合、メディアとテキストブロックにはならず通常の段落として処理されるべきケースです。
+:::
+
+### リッチなテキスト内容（見出し・複数段落・リスト）
+
+:::media-text right 60%
+![リッチコンテンツ](https://placehold.co/600x400/D1C4E9/333?text=Rich)
+
+### テキスト側の見出し
+
+最初の段落テキスト。**太字**と*斜体*を含みます。
+
+2番目の段落テキスト。
+
+1. 番号付きリスト1
+2. 番号付きリスト2
+3. 番号付きリスト3
+:::
+
+### コールアウトとの混在
+
+:::vk-group-alert-info
+media-text の前に置かれたコールアウトです。
+:::
+
+:::media-text right 30%
+![混在テスト](https://placehold.co/600x400/FFCCBC/333?text=Mixed)
+
+コールアウトの直後に配置されたメディアとテキストブロックです。
+:::
+
+---
+
 ## ボタンブロック（正式版）
 
-[btn](https://example.com/apply) 申し込む
+[btn](https://example.com/apply) 塗りつぶし
 
-[btn outline](https://example.com/detail) 詳しく見る
+[btn outline](https://example.com/detail) アウトライン
+
+[btn comp-blue](https://example.com/detail) ブルー立体
+
+[btn comp-orange](https://example.com/detail) オレンジ立体
+
+---
+
+## ボタンブロック省略記法（shorthand-map.json の button セクションで定義）
+
+※ shorthand-map.json に `"button": { "primary": "vk-btn-primary" }` を追加した場合のテスト
+
+[btn primary](https://example.com/apply) 省略記法ボタン
+
+### blue / orange（shorthand-map.json に定義済み）
+
+[btn blue](https://example.com/detail) ブルー立体（省略記法）
+
+[btn orange](https://example.com/detail) オレンジ立体（省略記法）
 
 ---
 
