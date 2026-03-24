@@ -199,9 +199,9 @@ media-text の前に置かれたコールアウトです。
 
 [btn outline](https://example.com/detail) アウトライン
 
-[btn comp-blue](https://example.com/detail) ブルー立体
+[btn blue](https://example.com/detail) ブルー立体
 
-[btn comp-orange](https://example.com/detail) オレンジ立体
+[btn orange](https://example.com/detail) オレンジ立体
 
 ---
 
