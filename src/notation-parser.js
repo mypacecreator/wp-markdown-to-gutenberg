@@ -9,9 +9,9 @@ const CALLOUT_TYPES = [ 'vk-group-alert-info', 'vk-group-alert-warning', 'vk-gro
 const BUTTON_NOTATION_REGEX = /^\[btn[ \]]/m;
 
 /**
- * Regex for more/separator notation: :::more:::
+ * Regex for more notation: :::more:::
  */
-const MORE_NOTATION_REGEX = /^:::more:::[ \t]*$/m;
+const MORE_NOTATION_REGEX = /^:::more:::[ \t\r]*$/m;
 
 /**
  * Regex for linked image: [![alt](img-url)](link-url)
@@ -155,7 +155,7 @@ export function parseNotation( text ) {
 		} );
 	}
 
-	// More/separator blocks
+	// More blocks (:::more:::)
 	const moreRegex = new RegExp( MORE_NOTATION_REGEX.source, 'gm' );
 	while ( ( m = moreRegex.exec( normalized ) ) !== null ) {
 		matches.push( {
@@ -207,7 +207,7 @@ export function parseNotation( text ) {
 				innerSegments: rest,
 			} );
 		} else if ( mt.kind === 'more' ) {
-			segments.push( { type: 'separator' } );
+			segments.push( { type: 'more' } );
 		}
 
 		lastIndex = mt.index + mt.length;
