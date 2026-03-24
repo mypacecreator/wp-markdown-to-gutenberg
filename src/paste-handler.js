@@ -1,6 +1,22 @@
 import { pasteHandler, createBlock } from '@wordpress/blocks';
 import { dispatch } from '@wordpress/data';
 import { parseNotation, hasNotation } from './notation-parser';
+import { parseLineSegments } from './line-parser';
+
+/**
+ * Convert a button segment to a core/buttons > core/button block.
+ *
+ * @param {Object} segment  Button segment with url, label, and className
+ * @return {Object} core/buttons block wrapping a core/button inner block
+ */
+function buttonsSegmentToBlock( segment ) {
+	const btn = createBlock( 'core/button', {
+		text: segment.label,
+		url: segment.url,
+		className: segment.className,
+	} );
+	return createBlock( 'core/buttons', {}, [ btn ] );
+}
 
 /**
  * Convert an image segment to a core/image block.
@@ -66,7 +82,12 @@ function onPaste( event ) {
 		return;
 	}
 
-	const segments = parseNotation( plainText );
+	const rawSegments = parseNotation( plainText );
+
+	// Expand text segments to detect button notation line-by-line
+	const segments = rawSegments.flatMap( ( s ) =>
+		s.type === 'text' ? parseLineSegments( s.content ) : [ s ]
+	);
 
 	// eslint-disable-next-line no-console
 	console.log( '[WPMTG] Parsed segments:', segments );
@@ -75,6 +96,7 @@ function onPaste( event ) {
 		( s ) =>
 			s.type === 'callout' ||
 			s.type === 'image' ||
+			s.type === 'button' ||
 			s.type === 'media-text'
 	);
 	if ( ! hasActionable ) {
@@ -91,7 +113,9 @@ function onPaste( event ) {
 	const allBlocks = [];
 
 	for ( const segment of segments ) {
-		if ( segment.type === 'image' ) {
+		if ( segment.type === 'button' ) {
+			allBlocks.push( buttonsSegmentToBlock( segment ) );
+		} else if ( segment.type === 'image' ) {
 			allBlocks.push( imageSegmentToBlock( segment ) );
 		} else if ( segment.type === 'callout' ) {
 			const innerBlocks = innerSegmentsToBlocks( segment.innerSegments );
