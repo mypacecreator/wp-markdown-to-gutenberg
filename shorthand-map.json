@@ -1,5 +1,6 @@
 {
   "info": "comp-info",
-  "warning": "comp-warning",
-  "success": "comp-success"
+  "related": "comp-related",
+  "warning": "sme-alert-warning",
+  "success": "sme-alert-success"
 }
