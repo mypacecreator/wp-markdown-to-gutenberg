@@ -12,17 +12,60 @@
 :::
 ```
 
-記法のタイプ文字列がそのまま `is-style-{type}` の className になる。
+`:::` の後に続くタイプ文字列がそのまま `is-style-{type}` の className になる。ホワイトリストはなく、対応するブロックスタイルが登録されていれば任意のスタイル名を指定可能。
 
-| 記法 | 適用 className |
-|-----|---------------|
+| 記法例 | 適用 className |
+|-------|---------------|
 | `:::vk-group-alert-info` | `is-style-vk-group-alert-info` |
 | `:::vk-group-alert-warning` | `is-style-vk-group-alert-warning` |
 | `:::vk-group-alert-success` | `is-style-vk-group-alert-success` |
-| `:::任意のスタイル名` | `is-style-任意のスタイル名` |
+| `:::my-custom-style` | `is-style-my-custom-style` |
+
+タイプ文字列には英字で始まる英数字・ハイフン・アンダースコア（`[a-zA-Z][a-zA-Z0-9_-]*`）が使用可能。
+
+#### 省略記法
+
+よく使うブロックスタイルは省略記法でも指定できる。省略記法はプラグインルートの `shorthand-map.json` で定義されており、ビルド不要で追加・変更が可能。
+
+```
+:::info
+テキスト
+:::
+```
+
+| 省略記法 | 展開後の className |
+|---------|-------------------|
+| `:::info` | `is-style-comp-info` |
+| `:::warning` | `is-style-comp-warning` |
+| `:::success` | `is-style-comp-success` |
 
 - 内側のマークダウンは段落・見出し・リストなどの標準ブロックに自動変換
 - 閉じタグ `:::` の前にタブ・スペースがあっても認識される
+
+#### 省略記法の追加・変更方法
+
+プラグインルートの `shorthand-map.json` を編集する。**ビルド不要**（ページリロードで即反映）。
+
+```json
+{
+  "callout": {
+    "info": "comp-info",
+    "warning": "comp-warning",
+    "success": "comp-success"
+  },
+  "button": {
+    "primary": "vk-btn-primary",
+    "outline": "vk-btn-outline"
+  }
+}
+```
+
+- `callout`：コールアウトブロック（`:::type`）の省略記法
+- `button`：ボタンブロック（`[btn type]`）の省略記法
+- キー：記法で使う省略名
+- 値：適用される `is-style-{値}` の `{値}` 部分
+- エントリを追加するだけで新しい省略記法が有効になる
+- ファイルが存在しない・JSON が不正な場合は省略記法が無効になるだけで、フルネーム記法は正常動作する
 
 ---
 
@@ -96,6 +139,16 @@
 |-----|---------|
 | `[btn](URL) テキスト` | プライマリ（塗り） |
 | `[btn outline](URL) テキスト` | セカンダリ（枠線） |
+
+#### ボタンスタイルの省略記法
+
+コールアウトと同様、ボタンスタイルも `shorthand-map.json` の `button` セクションで省略記法を定義できる。
+
+```
+[btn primary](https://example.com) ボタンテキスト
+```
+
+`shorthand-map.json` に `"button": { "primary": "vk-btn-primary" }` と定義されていれば、上記は `is-style-vk-btn-primary` に展開される。
 
 ---
 

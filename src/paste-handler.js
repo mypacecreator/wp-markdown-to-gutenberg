@@ -18,6 +18,12 @@ function buttonsSegmentToBlock( segment ) {
 	return createBlock( 'core/buttons', {}, [ btn ] );
 }
 
+const shorthandConfig = ( typeof window !== 'undefined'
+	&& window.wpmtgConfig
+	&& window.wpmtgConfig.shorthandMap ) || {};
+const calloutShorthandMap = shorthandConfig.callout || {};
+const buttonShorthandMap = shorthandConfig.button || {};
+
 /**
  * Convert an image segment to a core/image block.
  *
@@ -82,11 +88,11 @@ function onPaste( event ) {
 		return;
 	}
 
-	const rawSegments = parseNotation( plainText );
+	const rawSegments = parseNotation( plainText, calloutShorthandMap );
 
 	// Expand text segments to detect button notation line-by-line
 	const segments = rawSegments.flatMap( ( s ) =>
-		s.type === 'text' ? parseLineSegments( s.content ) : [ s ]
+		s.type === 'text' ? parseLineSegments( s.content, buttonShorthandMap ) : [ s ]
 	);
 
 	// eslint-disable-next-line no-console
