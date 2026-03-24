@@ -102,7 +102,7 @@
 ```
 
 - URLのみ指定。タイトル・サムネイル・概要はプラグインがエディター上で自動取得する
-- デフォルト値: `nofollow: false`、`new_tab: true`
+- デフォルト値: `nofollow: false`、`new_tab: true`、`template: 'simple'`、`type: 'external'`、`provider_used: 'php'`、`image_id: -1`
 - Visual Link Preview プラグインが未有効の場合は `core/paragraph` にリンクとしてフォールバック
 
 ---
