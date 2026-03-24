@@ -1,6 +1,22 @@
 import { pasteHandler, createBlock } from '@wordpress/blocks';
 import { dispatch } from '@wordpress/data';
 import { parseNotation, hasNotation } from './notation-parser';
+import { parseLineSegments } from './line-parser';
+
+/**
+ * Convert a button segment to a core/buttons > core/button block.
+ *
+ * @param {Object} segment  Button segment with url, label, and className
+ * @return {Object} core/buttons block wrapping a core/button inner block
+ */
+function buttonsSegmentToBlock( segment ) {
+	const btn = createBlock( 'core/button', {
+		text: segment.label,
+		url: segment.url,
+		className: segment.className,
+	} );
+	return createBlock( 'core/buttons', {}, [ btn ] );
+}
 
 const shorthandMap = ( typeof window !== 'undefined'
 	&& window.wpmtgConfig
@@ -19,6 +35,30 @@ function imageSegmentToBlock( segment ) {
 		attrs.linkDestination = 'custom';
 	}
 	return createBlock( 'core/image', attrs );
+}
+
+/**
+ * Convert an array of inner segments (from notation-parser) into blocks.
+ *
+ * @param {Array} innerSegments  Parsed segments (image or text)
+ * @return {Array} Gutenberg blocks
+ */
+function innerSegmentsToBlocks( innerSegments ) {
+	const blocks = [];
+	for ( const inner of innerSegments ) {
+		if ( inner.type === 'image' ) {
+			blocks.push( imageSegmentToBlock( inner ) );
+		} else if ( inner.content.trim() ) {
+			const converted = pasteHandler( {
+				plainText: inner.content,
+				mode: 'BLOCKS',
+			} );
+			if ( Array.isArray( converted ) ) {
+				blocks.push( ...converted );
+			}
+		}
+	}
+	return blocks;
 }
 
 /**
@@ -46,13 +86,22 @@ function onPaste( event ) {
 		return;
 	}
 
-	const segments = parseNotation( plainText, shorthandMap );
+	const rawSegments = parseNotation( plainText, shorthandMap );
+
+	// Expand text segments to detect button notation line-by-line
+	const segments = rawSegments.flatMap( ( s ) =>
+		s.type === 'text' ? parseLineSegments( s.content ) : [ s ]
+	);
 
 	// eslint-disable-next-line no-console
 	console.log( '[WPMTG] Parsed segments:', segments );
 
 	const hasActionable = segments.some(
-		( s ) => s.type === 'callout' || s.type === 'image'
+		( s ) =>
+			s.type === 'callout' ||
+			s.type === 'image' ||
+			s.type === 'button' ||
+			s.type === 'media-text'
 	);
 	if ( ! hasActionable ) {
 		return;
@@ -68,24 +117,12 @@ function onPaste( event ) {
 	const allBlocks = [];
 
 	for ( const segment of segments ) {
-		if ( segment.type === 'image' ) {
+		if ( segment.type === 'button' ) {
+			allBlocks.push( buttonsSegmentToBlock( segment ) );
+		} else if ( segment.type === 'image' ) {
 			allBlocks.push( imageSegmentToBlock( segment ) );
 		} else if ( segment.type === 'callout' ) {
-			const innerBlocks = [];
-
-			for ( const inner of segment.innerSegments ) {
-				if ( inner.type === 'image' ) {
-					innerBlocks.push( imageSegmentToBlock( inner ) );
-				} else if ( inner.content.trim() ) {
-					const converted = pasteHandler( {
-						plainText: inner.content,
-						mode: 'BLOCKS',
-					} );
-					if ( Array.isArray( converted ) ) {
-						innerBlocks.push( ...converted );
-					}
-				}
-			}
+			const innerBlocks = innerSegmentsToBlocks( segment.innerSegments );
 
 			// eslint-disable-next-line no-console
 			console.log( '[WPMTG] Inner blocks:', innerBlocks );
@@ -99,6 +136,37 @@ function onPaste( event ) {
 			);
 
 			allBlocks.push( groupBlock );
+		} else if ( segment.type === 'media-text' ) {
+			if ( ! segment.imageSegment ) {
+				// No image found — fall back to normal text handling
+				allBlocks.push( ...innerSegmentsToBlocks( segment.innerSegments ) );
+				continue;
+			}
+
+			const innerBlocks = innerSegmentsToBlocks( segment.innerSegments );
+
+			const mediaAttrs = {
+				mediaType: 'image',
+				mediaPosition: segment.mediaPosition,
+				mediaWidth: segment.mediaWidth,
+			};
+
+			if ( segment.imageSegment ) {
+				mediaAttrs.mediaUrl = segment.imageSegment.url;
+				mediaAttrs.mediaAlt = segment.imageSegment.alt || '';
+
+				if ( segment.imageSegment.href ) {
+					mediaAttrs.href = segment.imageSegment.href;
+					mediaAttrs.linkDestination = 'custom';
+				}
+			}
+
+			// eslint-disable-next-line no-console
+			console.log( '[WPMTG] Media-text block:', mediaAttrs, innerBlocks );
+
+			allBlocks.push(
+				createBlock( 'core/media-text', mediaAttrs, innerBlocks )
+			);
 		} else if ( segment.content.trim() ) {
 			const normalBlocks = pasteHandler( {
 				plainText: segment.content,
