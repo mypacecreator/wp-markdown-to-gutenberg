@@ -59,7 +59,7 @@
 :::related
 ▶関連記事
 
-`:::success` → `is-style-comp-related` に変換されます。
+`:::related` → `is-style-comp-related` に変換されます。
 :::
 
 ---
