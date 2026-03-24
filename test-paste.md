@@ -43,7 +43,7 @@
 :::warning
 ⚠️ 注意（省略記法）
 
-`:::warning` → `is-style-me-alert-warning` に変換されます。
+`:::warning` → `is-style-sme-alert-warning` に変換されます。
 :::
 
 ### 省略記法 — SUCCESS
