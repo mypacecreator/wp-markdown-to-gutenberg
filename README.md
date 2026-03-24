@@ -48,13 +48,21 @@
 
 ```json
 {
-  "info": "comp-info",
-  "warning": "comp-warning",
-  "success": "comp-success"
+  "callout": {
+    "info": "comp-info",
+    "warning": "comp-warning",
+    "success": "comp-success"
+  },
+  "button": {
+    "primary": "vk-btn-primary",
+    "outline": "vk-btn-outline"
+  }
 }
 ```
 
-- キー：記法で使う省略名（`:::` の直後に書く文字列）
+- `callout`：コールアウトブロック（`:::type`）の省略記法
+- `button`：ボタンブロック（`[btn type]`）の省略記法
+- キー：記法で使う省略名
 - 値：適用される `is-style-{値}` の `{値}` 部分
 - エントリを追加するだけで新しい省略記法が有効になる
 - ファイルが存在しない・JSON が不正な場合は省略記法が無効になるだけで、フルネーム記法は正常動作する
@@ -131,6 +139,16 @@
 |-----|---------|
 | `[btn](URL) テキスト` | プライマリ（塗り） |
 | `[btn outline](URL) テキスト` | セカンダリ（枠線） |
+
+#### ボタンスタイルの省略記法
+
+コールアウトと同様、ボタンスタイルも `shorthand-map.json` の `button` セクションで省略記法を定義できる。
+
+```
+[btn primary](https://example.com) ボタンテキスト
+```
+
+`shorthand-map.json` に `"button": { "primary": "vk-btn-primary" }` と定義されていれば、上記は `is-style-vk-btn-primary` に展開される。
 
 ---
 

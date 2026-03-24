@@ -1,6 +1,9 @@
 {
-  "info": "comp-info",
-  "related": "comp-related",
-  "warning": "sme-alert-warning",
-  "success": "sme-alert-success"
+  "callout": {
+    "info": "comp-info",
+    "related": "comp-related",
+    "warning": "sme-alert-warning",
+    "success": "sme-alert-success"
+  },
+  "button": {}
 }

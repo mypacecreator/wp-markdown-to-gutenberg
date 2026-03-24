@@ -205,6 +205,14 @@ media-text の前に置かれたコールアウトです。
 
 ---
 
+## ボタンブロック省略記法（shorthand-map.json の button セクションで定義）
+
+※ shorthand-map.json に `"button": { "primary": "vk-btn-primary" }` を追加した場合のテスト
+
+[btn primary](https://example.com/apply) 省略記法ボタン
+
+---
+
 ## 再利用ブロック（正式版）
 
 {{reuse:1}}
