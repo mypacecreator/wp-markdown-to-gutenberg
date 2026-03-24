@@ -9,6 +9,11 @@ const CALLOUT_TYPES = [ 'vk-group-alert-info', 'vk-group-alert-warning', 'vk-gro
 const BUTTON_NOTATION_REGEX = /^\[btn[ \]]/m;
 
 /**
+ * Regex for more/separator notation: :::more:::
+ */
+const MORE_NOTATION_REGEX = /^:::more:::[ \t]*$/m;
+
+/**
  * Regex for linked image: [![alt](img-url)](link-url)
  */
 const LINKED_IMAGE_REGEX = /^\[!\[([^\]]*)\]\(([^)]+)\)\]\(([^)]+)\)\s*$/m;
@@ -150,6 +155,16 @@ export function parseNotation( text ) {
 		} );
 	}
 
+	// More/separator blocks
+	const moreRegex = new RegExp( MORE_NOTATION_REGEX.source, 'gm' );
+	while ( ( m = moreRegex.exec( normalized ) ) !== null ) {
+		matches.push( {
+			kind: 'more',
+			index: m.index,
+			length: m[ 0 ].length,
+		} );
+	}
+
 	// Sort by position in text
 	matches.sort( ( a, b ) => a.index - b.index );
 
@@ -191,6 +206,8 @@ export function parseNotation( text ) {
 				imageSegment: imageSegment || null,
 				innerSegments: rest,
 			} );
+		} else if ( mt.kind === 'more' ) {
+			segments.push( { type: 'separator' } );
 		}
 
 		lastIndex = mt.index + mt.length;
@@ -217,6 +234,7 @@ export function hasNotation( text ) {
 	return (
 		calloutRegex.test( text ) ||
 		mediaTextDetect.test( text ) ||
+		MORE_NOTATION_REGEX.test( text ) ||
 		PLAIN_IMAGE_REGEX.test( text ) ||
 		LINKED_IMAGE_REGEX.test( text ) ||
 		BUTTON_NOTATION_REGEX.test( text )
