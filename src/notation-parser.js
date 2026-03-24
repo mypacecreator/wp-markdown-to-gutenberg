@@ -4,6 +4,11 @@
 const BUTTON_NOTATION_REGEX = /^\[btn[ \]]/m;
 
 /**
+ * Regex for more notation: :::more:::
+ */
+const MORE_NOTATION_REGEX = /^:::more:::[ \t\r]*$/m;
+
+/**
  * Regex for linked image: [![alt](img-url)](link-url)
  */
 const LINKED_IMAGE_REGEX = /^\[!\[([^\]]*)\]\(([^)]+)\)\]\(([^)]+)\)\s*$/m;
@@ -145,6 +150,16 @@ export function parseNotation( text, shorthandMap = {} ) {
 		} );
 	}
 
+	// More blocks (:::more:::)
+	const moreRegex = new RegExp( MORE_NOTATION_REGEX.source, 'gm' );
+	while ( ( m = moreRegex.exec( normalized ) ) !== null ) {
+		matches.push( {
+			kind: 'more',
+			index: m.index,
+			length: m[ 0 ].length,
+		} );
+	}
+
 	// Sort by position in text
 	matches.sort( ( a, b ) => a.index - b.index );
 
@@ -189,6 +204,8 @@ export function parseNotation( text, shorthandMap = {} ) {
 				imageSegment: imageSegment || null,
 				innerSegments: rest,
 			} );
+		} else if ( mt.kind === 'more' ) {
+			segments.push( { type: 'more' } );
 		}
 
 		lastIndex = mt.index + mt.length;
@@ -212,6 +229,7 @@ export function hasNotation( text ) {
 	const calloutRegex = /^:::([a-zA-Z][a-zA-Z0-9_-]*)\s*$/m;
 	return (
 		calloutRegex.test( text ) ||
+		MORE_NOTATION_REGEX.test( text ) ||
 		PLAIN_IMAGE_REGEX.test( text ) ||
 		LINKED_IMAGE_REGEX.test( text ) ||
 		BUTTON_NOTATION_REGEX.test( text )

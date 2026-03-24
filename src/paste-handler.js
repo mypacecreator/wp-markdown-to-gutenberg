@@ -103,7 +103,8 @@ function onPaste( event ) {
 			s.type === 'callout' ||
 			s.type === 'image' ||
 			s.type === 'button' ||
-			s.type === 'media-text'
+			s.type === 'media-text' ||
+			s.type === 'more'
 	);
 	if ( ! hasActionable ) {
 		return;
@@ -123,6 +124,8 @@ function onPaste( event ) {
 			allBlocks.push( buttonsSegmentToBlock( segment ) );
 		} else if ( segment.type === 'image' ) {
 			allBlocks.push( imageSegmentToBlock( segment ) );
+		} else if ( segment.type === 'more' ) {
+			allBlocks.push( createBlock( 'core/more' ) );
 		} else if ( segment.type === 'callout' ) {
 			const innerBlocks = innerSegmentsToBlocks( segment.innerSegments );
 
