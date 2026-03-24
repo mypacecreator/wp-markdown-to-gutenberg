@@ -1,4 +1,4 @@
-import { pasteHandler, createBlock } from '@wordpress/blocks';
+import { pasteHandler, createBlock, getBlockType } from '@wordpress/blocks';
 import { dispatch } from '@wordpress/data';
 import { parseNotation, hasNotation } from './notation-parser';
 import { parseLineSegments } from './line-parser';
@@ -40,9 +40,79 @@ function imageSegmentToBlock( segment ) {
 }
 
 /**
+ * Convert an embed segment to a visual-link-preview/link block.
+ * Falls back to a core/paragraph with a link if the plugin is not active.
+ *
+ * @param {Object} segment  Embed segment with url
+ * @return {Object} visual-link-preview/link or core/paragraph block
+ */
+function isHttpUrl( url ) {
+	try {
+		const parsed = new URL( url );
+		return parsed.protocol === 'http:' || parsed.protocol === 'https:';
+	} catch ( e ) {
+		return false;
+	}
+}
+
+function utf8ToBase64( str ) {
+	const bytes = new TextEncoder().encode( str );
+	let binary = '';
+	for ( let i = 0; i < bytes.length; i++ ) {
+		binary += String.fromCharCode( bytes[ i ] );
+	}
+	return btoa( binary );
+}
+
+function embedSegmentToBlock( segment ) {
+	if ( ! getBlockType( 'visual-link-preview/link' ) ) {
+		if ( ! isHttpUrl( segment.url ) ) {
+			return createBlock( 'core/paragraph', {
+				content: segment.url,
+			} );
+		}
+		const escapedUrl = segment.url
+			.replace( /&/g, '&amp;' )
+			.replace( /"/g, '&quot;' )
+			.replace( /</g, '&lt;' )
+			.replace( />/g, '&gt;' );
+		return createBlock( 'core/paragraph', {
+			content: `<a href="${ escapedUrl }">${ escapedUrl }</a>`,
+		} );
+	}
+
+	const encoded = utf8ToBase64( JSON.stringify( {
+		type: 'external',
+		post: 0,
+		post_label: '',
+		url: segment.url,
+		provider_used: 'php',
+		template: 'simple',
+		nofollow: false,
+		new_tab: true,
+		title: '',
+		summary: '',
+		image_id: -1,
+		image_url: '',
+		custom_class: 'wp-block-visual-link-preview-link',
+	} ) );
+
+	return createBlock( 'visual-link-preview/link', {
+		url: segment.url,
+		nofollow: false,
+		new_tab: true,
+		image_id: -1,
+		type: 'external',
+		provider_used: 'php',
+		template: 'simple',
+		encoded,
+	} );
+}
+
+/**
  * Convert an array of inner segments (from notation-parser) into blocks.
  *
- * @param {Array} innerSegments  Parsed segments (image or text)
+ * @param {Array} innerSegments  Parsed segments (image, embed, or text)
  * @return {Array} Gutenberg blocks
  */
 function innerSegmentsToBlocks( innerSegments ) {
@@ -50,6 +120,8 @@ function innerSegmentsToBlocks( innerSegments ) {
 	for ( const inner of innerSegments ) {
 		if ( inner.type === 'image' ) {
 			blocks.push( imageSegmentToBlock( inner ) );
+		} else if ( inner.type === 'embed' ) {
+			blocks.push( embedSegmentToBlock( inner ) );
 		} else if ( inner.content.trim() ) {
 			const converted = pasteHandler( {
 				plainText: inner.content,
@@ -102,6 +174,7 @@ function onPaste( event ) {
 		( s ) =>
 			s.type === 'callout' ||
 			s.type === 'image' ||
+			s.type === 'embed' ||
 			s.type === 'button' ||
 			s.type === 'media-text' ||
 			s.type === 'more'
@@ -124,6 +197,8 @@ function onPaste( event ) {
 			allBlocks.push( buttonsSegmentToBlock( segment ) );
 		} else if ( segment.type === 'image' ) {
 			allBlocks.push( imageSegmentToBlock( segment ) );
+		} else if ( segment.type === 'embed' ) {
+			allBlocks.push( embedSegmentToBlock( segment ) );
 		} else if ( segment.type === 'more' ) {
 			allBlocks.push( createBlock( 'core/more' ) );
 		} else if ( segment.type === 'callout' ) {

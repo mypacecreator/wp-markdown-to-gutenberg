@@ -95,6 +95,12 @@
 
 ---
 
+## Visual Link Preview（実装済み）
+
+[embed](https://mypacecreator.net/blog/archives/3037)
+
+---
+
 ## メディアとテキストブロック（実装済み）
 
 ### 基本形（左配置・50%幅）
@@ -248,6 +254,8 @@ media-text の前に置かれたコールアウトです。
 :::
 
 上記コールアウトの後に続く通常テキスト。
+
+[embed](https://example.com/mixed-test)
 
 [btn](https://example.com) ボタンも混在
 

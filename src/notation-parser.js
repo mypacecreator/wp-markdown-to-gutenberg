@@ -19,13 +19,19 @@ const LINKED_IMAGE_REGEX = /^\[!\[([^\]]*)\]\(([^)]+)\)\]\(([^)]+)\)\s*$/m;
 const PLAIN_IMAGE_REGEX = /^!\[([^\]]*)\]\(([^)]+)\)\s*$/m;
 
 /**
- * Split a text string into segments, extracting standalone image lines.
+ * Regex for embed (Visual Link Preview): [embed](url)
+ */
+const EMBED_REGEX = /^\[embed\]\(([^)]+)\)\s*$/m;
+
+/**
+ * Split a text string into segments, extracting standalone image and embed lines.
  *
  * Returns an array of segments:
  *   { type: 'text',  content: '...' }
  *   { type: 'image', alt: '...', url: '...', href?: '...' }
+ *   { type: 'embed', url: '...' }
  *
- * Pattern 2 (linked image) is evaluated before Pattern 1 (plain image).
+ * Embed is evaluated before linked image, which is evaluated before plain image.
  *
  * @param {string} text Plain text to parse
  * @return {Array} Parsed segments
@@ -36,6 +42,16 @@ function splitTextByImages( text ) {
 	let buffer = [];
 
 	for ( const line of lines ) {
+		const embed = EMBED_REGEX.exec( line );
+		if ( embed ) {
+			if ( buffer.length ) {
+				result.push( { type: 'text', content: buffer.join( '\n' ) } );
+				buffer = [];
+			}
+			result.push( { type: 'embed', url: embed[ 1 ].trim() } );
+			continue;
+		}
+
 		const linked = LINKED_IMAGE_REGEX.exec( line );
 		if ( linked ) {
 			if ( buffer.length ) {
@@ -220,7 +236,7 @@ export function parseNotation( text, shorthandMap = {} ) {
 
 /**
  * Check if text contains any supported notation
- * (callout blocks, image lines, or button notation).
+ * (callout blocks, image lines, embed links, or button notation).
  *
  * @param {string} text Plain text to check
  * @return {boolean} True if notation is found
@@ -230,6 +246,7 @@ export function hasNotation( text ) {
 	return (
 		calloutRegex.test( text ) ||
 		MORE_NOTATION_REGEX.test( text ) ||
+		EMBED_REGEX.test( text ) ||
 		PLAIN_IMAGE_REGEX.test( text ) ||
 		LINKED_IMAGE_REGEX.test( text ) ||
 		BUTTON_NOTATION_REGEX.test( text )
