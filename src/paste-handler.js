@@ -178,7 +178,7 @@ function onPaste( event ) {
 			s.type === 'button' ||
 			s.type === 'media-text' ||
 			s.type === 'more' ||
-		s.type === 'reuse'
+			s.type === 'reuse'
 	);
 	if ( ! hasActionable ) {
 		return;
@@ -253,12 +253,12 @@ function onPaste( event ) {
 			if ( ref === null && segment.slug ) {
 				const wpBlocks =
 					select( 'core' ).getEntityRecords( 'postType', 'wp_block', {
-						per_page: -1,
+						per_page: 100,
 					} ) || [];
 				const matched = wpBlocks.find( ( b ) => b.slug === segment.slug );
 				ref = matched ? matched.id : null;
 			}
-			if ( ref !== null ) {
+			if ( ref !== null && ref > 0 ) {
 				allBlocks.push( createBlock( 'core/block', { ref } ) );
 			}
 		} else if ( segment.content.trim() ) {
@@ -304,7 +304,7 @@ export function installPasteHandler() {
 	// Prefetch all reusable blocks (wp_block) so slug resolution works synchronously
 	// when the user pastes. getEntityRecords triggers a REST API fetch in the background
 	// and caches results in the WordPress data store.
-	select( 'core' ).getEntityRecords( 'postType', 'wp_block', { per_page: -1 } );
+	select( 'core' ).getEntityRecords( 'postType', 'wp_block', { per_page: 100 } );
 
 	// Fallback: attach to parent document (works if editor is NOT in iframe)
 	attachToDocument( document, 'parent document' );
