@@ -97,9 +97,7 @@
 
 ## Visual Link Preview（実装済み）
 
-[embed](https://www.commerce-design.net/tools/comanosuke/)
-
-[embed](https://ja.wikipedia.org/wiki/WordPress)
+[embed](https://mypacecreator.net/blog/archives/3037)
 
 ---
 
