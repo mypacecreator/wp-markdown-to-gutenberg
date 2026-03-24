@@ -181,7 +181,7 @@ export function parseNotation( text ) {
 				type: 'media-text',
 				mediaPosition: mt.position || 'left',
 				mediaWidth: mt.width
-					? Math.max( 10, Math.min( 90, parseInt( mt.width, 10 ) ) )
+					? Math.max( 15, Math.min( 85, parseInt( mt.width, 10 ) ) )
 					: 50,
 				imageSegment: imageSegment || null,
 				innerSegments: rest,
