@@ -1,9 +1,4 @@
 /**
- * Supported callout types. Add entries here to support new types.
- */
-const CALLOUT_TYPES = [ 'vk-group-alert-info', 'vk-group-alert-warning', 'vk-group-alert-success' ];
-
-/**
  * Regex for button notation (loose check for hasNotation early return).
  */
 const BUTTON_NOTATION_REGEX = /^\[btn[ \]]/m;
@@ -118,21 +113,21 @@ function extractFirstImage( segments ) {
  * @param {string} text Plain text to parse
  * @return {Array} Parsed segments
  */
-export function parseNotation( text ) {
+export function parseNotation( text, shorthandMap = {} ) {
 	// Normalize line endings
 	const normalized = text.replace( /\r\n/g, '\n' );
 
 	// Collect all fenced-block matches with their positions
 	const matches = [];
 
-	// Callout blocks
-	const typePattern = CALLOUT_TYPES.join( '|' );
-	const calloutRegex = new RegExp(
-		`^:::(${ typePattern })\\s*\\n([\\s\\S]*?)\\n^[ \\t]*:::[ \\t]*$`,
-		'gm'
-	);
+	// Callout blocks — generic pattern accepts any ASCII identifier after :::
+	const calloutRegex = /^:::([a-zA-Z][a-zA-Z0-9_-]*)\s*\n([\s\S]*?)\n^[ \t]*:::[ \t]*$/gm;
 	let m;
 	while ( ( m = calloutRegex.exec( normalized ) ) !== null ) {
+		// Skip media-text blocks (handled by dedicated regex below)
+		if ( m[ 1 ] === 'media-text' ) {
+			continue;
+		}
 		matches.push( {
 			kind: 'callout',
 			index: m.index,
@@ -187,9 +182,12 @@ export function parseNotation( text ) {
 		}
 
 		if ( mt.kind === 'callout' ) {
+			const rawType = mt.calloutType;
+			const resolvedType = shorthandMap[ rawType ] || rawType;
+
 			segments.push( {
 				type: 'callout',
-				calloutType: mt.calloutType,
+				calloutType: resolvedType,
 				content: mt.content,
 				innerSegments: splitTextByImages( mt.content ),
 			} );
@@ -228,17 +226,12 @@ export function parseNotation( text ) {
  * @return {boolean} True if notation is found
  */
 export function hasNotation( text ) {
-	const typePattern = CALLOUT_TYPES.join( '|' );
-	const calloutRegex = new RegExp( `^:::(${ typePattern })\\s*$`, 'm' );
-	const mediaTextDetect = /^:::media-text(?:\s|$)/m;
+	const calloutRegex = /^:::([a-zA-Z][a-zA-Z0-9_-]*)\s*$/m;
 	return (
 		calloutRegex.test( text ) ||
-		mediaTextDetect.test( text ) ||
 		MORE_NOTATION_REGEX.test( text ) ||
 		PLAIN_IMAGE_REGEX.test( text ) ||
 		LINKED_IMAGE_REGEX.test( text ) ||
 		BUTTON_NOTATION_REGEX.test( text )
 	);
 }
-
-export { CALLOUT_TYPES };

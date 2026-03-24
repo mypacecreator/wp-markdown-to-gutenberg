@@ -17,7 +17,7 @@ const BUTTON_REGEX = /^\[btn( [\w-]+)?\]\(([^)]+)\)\s+(.+)$/;
  * @param {string} text Plain text to parse
  * @return {Array} Parsed segments
  */
-export function parseLineSegments( text ) {
+export function parseLineSegments( text, shorthandMap = {} ) {
 	const lines = text.split( '\n' );
 	const result = [];
 	let buffer = [];
@@ -33,12 +33,13 @@ export function parseLineSegments( text ) {
 		const btnMatch = BUTTON_REGEX.exec( line );
 		if ( btnMatch ) {
 			flushBuffer();
-			const styleName = btnMatch[ 1 ] ? btnMatch[ 1 ].trim() : '';
+			const rawStyle = btnMatch[ 1 ] ? btnMatch[ 1 ].trim() : '';
+			const resolvedStyle = shorthandMap[ rawStyle ] || rawStyle;
 			result.push( {
 				type: 'button',
 				url: btnMatch[ 2 ],
 				label: btnMatch[ 3 ],
-				className: styleName ? `is-style-${ styleName }` : '',
+				className: resolvedStyle ? `is-style-${ resolvedStyle }` : '',
 			} );
 			continue;
 		}
