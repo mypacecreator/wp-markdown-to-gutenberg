@@ -1,7 +1,6 @@
 # WP Markdown to Gutenberg — ペーストテスト用ダミー原稿
 
 > このファイルの全文をコピーしてGutenbergエディターに貼り付け、各記法が正しく変換されることを確認してください。
-> 現時点でプラグインが対応済みなのは「コールアウト」のみです。他の記法は正式版実装後に変換されます。
 
 ---
 
@@ -44,7 +43,7 @@
 :::warning
 ⚠️ 注意（省略記法）
 
-`:::warning` → `is-style-comp-warning` に変換されます。
+`:::warning` → `is-style-me-alert-warning` に変換されます。
 :::
 
 ### 省略記法 — SUCCESS
@@ -52,14 +51,22 @@
 :::success
 ✅ 完了（省略記法）
 
-`:::success` → `is-style-comp-success` に変換されます。
+`:::success` → `is-style-sme-alert-success` に変換されます。
+:::
+	
+### 省略記法 — related
+
+:::related
+▶関連記事
+
+`:::success` → `is-style-comp-related` に変換されます。
 :::
 
 ---
 
 ### フルネーム記法 — INFO
 
-:::vk-group-alert-info
+:::comp-info
 ## お知らせ
 
 これは情報ブロックです。
@@ -72,7 +79,7 @@
 
 ### フルネーム記法 — WARNING
 
-:::vk-group-alert-warning
+:::sme-alert-warning
 ⚠️ 注意事項
 
 この操作は取り消せません。実行前に必ずバックアップを取ってください。
@@ -80,7 +87,7 @@
 
 ### フルネーム記法 — SUCCESS
 
-:::vk-group-alert-success
+:::sme-alert-success
 ✅ 完了しました
 
 設定が正常に保存されました。変更は即時反映されます。
@@ -188,9 +195,13 @@ media-text の前に置かれたコールアウトです。
 
 ## ボタンブロック（正式版）
 
-[btn](https://example.com/apply) 申し込む
+[btn](https://example.com/apply) 塗りつぶし
 
-[btn outline](https://example.com/detail) 詳しく見る
+[btn outline](https://example.com/detail) アウトライン
+
+[btn comp-blue](https://example.com/detail) ブルー立体
+
+[btn comp-orange](https://example.com/detail) オレンジ立体
 
 ---
 
