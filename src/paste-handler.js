@@ -191,6 +191,18 @@ function onPaste( event ) {
 	// eslint-disable-next-line no-console
 	console.log( '[WPMTG] Prevented default, converting to blocks...' );
 
+	// Build slug→id lookup once from the prefetched cache so slug resolution
+	// does not call getEntityRecords on every reuse segment in the loop.
+	const cachedWpBlocks =
+		select( 'core' ).getEntityRecords( 'postType', 'wp_block', {
+			per_page: 100,
+		} ) || [];
+	const slugToId = new Map(
+		cachedWpBlocks
+			.filter( ( b ) => b.slug && b.id > 0 )
+			.map( ( b ) => [ b.slug, b.id ] )
+	);
+
 	const allBlocks = [];
 
 	for ( const segment of segments ) {
@@ -249,16 +261,13 @@ function onPaste( event ) {
 				createBlock( 'core/media-text', mediaAttrs, innerBlocks )
 			);
 		} else if ( segment.type === 'reuse' ) {
-			let ref = segment.id;
-			if ( ref === null && segment.slug ) {
-				const wpBlocks =
-					select( 'core' ).getEntityRecords( 'postType', 'wp_block', {
-						per_page: 100,
-					} ) || [];
-				const matched = wpBlocks.find( ( b ) => b.slug === segment.slug );
-				ref = matched ? matched.id : null;
+			let ref = null;
+			if ( segment.id !== null && segment.id > 0 ) {
+				ref = segment.id;
+			} else if ( segment.slug ) {
+				ref = slugToId.get( segment.slug ) ?? null;
 			}
-			if ( ref !== null && ref > 0 ) {
+			if ( ref !== null ) {
 				allBlocks.push( createBlock( 'core/block', { ref } ) );
 			}
 		} else if ( segment.content.trim() ) {
@@ -276,9 +285,19 @@ function onPaste( event ) {
 	// eslint-disable-next-line no-console
 	console.log( '[WPMTG] All blocks to insert:', allBlocks );
 
-	if ( allBlocks.length > 0 ) {
-		dispatch( 'core/block-editor' ).insertBlocks( allBlocks );
+	if ( allBlocks.length === 0 ) {
+		// All segments failed to resolve (e.g. slug not yet in cache) —
+		// fall back to standard paste so user input is not silently dropped.
+		const fallbackBlocks = pasteHandler( {
+			plainText,
+			mode: 'BLOCKS',
+		} );
+		if ( Array.isArray( fallbackBlocks ) && fallbackBlocks.length > 0 ) {
+			dispatch( 'core/block-editor' ).insertBlocks( fallbackBlocks );
+		}
+		return;
 	}
+	dispatch( 'core/block-editor' ).insertBlocks( allBlocks );
 }
 
 /**
@@ -301,9 +320,10 @@ function attachToDocument( doc, label ) {
  * it appears and its contentDocument is accessible.
  */
 export function installPasteHandler() {
-	// Prefetch all reusable blocks (wp_block) so slug resolution works synchronously
-	// when the user pastes. getEntityRecords triggers a REST API fetch in the background
-	// and caches results in the WordPress data store.
+	// Prefetch the first 100 reusable blocks (wp_block) so slug resolution works
+	// synchronously when the user pastes. getEntityRecords triggers a REST API fetch
+	// in the background and caches results in the WordPress data store.
+	// Blocks beyond the first 100 are not prefetched and cannot be resolved by slug.
 	select( 'core' ).getEntityRecords( 'postType', 'wp_block', { per_page: 100 } );
 
 	// Fallback: attach to parent document (works if editor is NOT in iframe)
