@@ -46,8 +46,31 @@ function imageSegmentToBlock( segment ) {
  * @param {Object} segment  Embed segment with url
  * @return {Object} visual-link-preview/link or core/paragraph block
  */
+function isHttpUrl( url ) {
+	try {
+		const parsed = new URL( url );
+		return parsed.protocol === 'http:' || parsed.protocol === 'https:';
+	} catch ( e ) {
+		return false;
+	}
+}
+
+function utf8ToBase64( str ) {
+	const bytes = new TextEncoder().encode( str );
+	let binary = '';
+	for ( let i = 0; i < bytes.length; i++ ) {
+		binary += String.fromCharCode( bytes[ i ] );
+	}
+	return btoa( binary );
+}
+
 function embedSegmentToBlock( segment ) {
 	if ( ! getBlockType( 'visual-link-preview/link' ) ) {
+		if ( ! isHttpUrl( segment.url ) ) {
+			return createBlock( 'core/paragraph', {
+				content: segment.url,
+			} );
+		}
 		const escapedUrl = segment.url
 			.replace( /&/g, '&amp;' )
 			.replace( /"/g, '&quot;' )
@@ -58,7 +81,7 @@ function embedSegmentToBlock( segment ) {
 		} );
 	}
 
-	const encoded = btoa( unescape( encodeURIComponent( JSON.stringify( {
+	const encoded = utf8ToBase64( JSON.stringify( {
 		type: 'external',
 		post: 0,
 		post_label: '',
@@ -72,7 +95,7 @@ function embedSegmentToBlock( segment ) {
 		image_id: -1,
 		image_url: '',
 		custom_class: 'wp-block-visual-link-preview-link',
-	} ) ) ) );
+	} ) );
 
 	return createBlock( 'visual-link-preview/link', {
 		url: segment.url,
