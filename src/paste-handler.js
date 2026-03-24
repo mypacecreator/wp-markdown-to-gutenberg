@@ -63,7 +63,7 @@ function embedSegmentToBlock( segment ) {
 		post: 0,
 		post_label: '',
 		url: segment.url,
-		provider_used: 'microlink',
+		provider_used: 'php',
 		template: 'simple',
 		nofollow: false,
 		new_tab: true,
@@ -80,7 +80,7 @@ function embedSegmentToBlock( segment ) {
 		new_tab: true,
 		image_id: -1,
 		type: 'external',
-		provider_used: 'microlink',
+		provider_used: 'php',
 		template: 'simple',
 		encoded,
 	} );
