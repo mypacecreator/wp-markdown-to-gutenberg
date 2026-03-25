@@ -23,6 +23,7 @@ const shorthandConfig = ( typeof window !== 'undefined'
 	&& window.wpmtgConfig.shorthandMap ) || {};
 const calloutShorthandMap = shorthandConfig.callout || {};
 const buttonShorthandMap = shorthandConfig.button || {};
+const reuseShorthandMap = shorthandConfig.reuse || {};
 
 /**
  * Convert an image segment to a core/image block.
@@ -162,9 +163,11 @@ function onPaste( event ) {
 
 	const rawSegments = parseNotation( plainText, calloutShorthandMap );
 
-	// Expand text segments to detect button notation line-by-line
+	// Expand text segments to detect button and reuse notation line-by-line
 	const segments = rawSegments.flatMap( ( s ) =>
-		s.type === 'text' ? parseLineSegments( s.content, buttonShorthandMap ) : [ s ]
+		s.type === 'text'
+			? parseLineSegments( s.content, buttonShorthandMap, reuseShorthandMap )
+			: [ s ]
 	);
 
 	// eslint-disable-next-line no-console
@@ -177,18 +180,12 @@ function onPaste( event ) {
 			s.type === 'embed' ||
 			s.type === 'button' ||
 			s.type === 'media-text' ||
-			s.type === 'more'
+			s.type === 'more' ||
+			s.type === 'reuse'
 	);
 	if ( ! hasActionable ) {
 		return;
 	}
-
-	// Block Gutenberg's default paste processing
-	event.preventDefault();
-	event.stopImmediatePropagation();
-
-	// eslint-disable-next-line no-console
-	console.log( '[WPMTG] Prevented default, converting to blocks...' );
 
 	const allBlocks = [];
 
@@ -247,6 +244,10 @@ function onPaste( event ) {
 			allBlocks.push(
 				createBlock( 'core/media-text', mediaAttrs, innerBlocks )
 			);
+		} else if ( segment.type === 'reuse' ) {
+			if ( segment.id !== null && segment.id > 0 ) {
+				allBlocks.push( createBlock( 'core/block', { ref: segment.id } ) );
+			}
 		} else if ( segment.content.trim() ) {
 			const normalBlocks = pasteHandler( {
 				plainText: segment.content,
@@ -262,9 +263,20 @@ function onPaste( event ) {
 	// eslint-disable-next-line no-console
 	console.log( '[WPMTG] All blocks to insert:', allBlocks );
 
-	if ( allBlocks.length > 0 ) {
-		dispatch( 'core/block-editor' ).insertBlocks( allBlocks );
+	if ( allBlocks.length === 0 ) {
+		// All segments failed to resolve (e.g. unknown alias or invalid ID) —
+		// let Gutenberg handle the paste natively.
+		return;
 	}
+
+	// Block Gutenberg's default paste processing only when we have blocks to insert
+	event.preventDefault();
+	event.stopImmediatePropagation();
+
+	// eslint-disable-next-line no-console
+	console.log( '[WPMTG] Prevented default, inserting blocks...' );
+
+	dispatch( 'core/block-editor' ).insertBlocks( allBlocks );
 }
 
 /**

@@ -14,12 +14,12 @@
 
 `:::` の後に続くタイプ文字列がそのまま `is-style-{type}` の className になる。ホワイトリストはなく、対応するブロックスタイルが登録されていれば任意のスタイル名を指定可能。
 
-| 記法例 | 適用 className |
-|-------|---------------|
-| `:::vk-group-alert-info` | `is-style-vk-group-alert-info` |
-| `:::vk-group-alert-warning` | `is-style-vk-group-alert-warning` |
-| `:::vk-group-alert-success` | `is-style-vk-group-alert-success` |
-| `:::my-custom-style` | `is-style-my-custom-style` |
+| 記法例                      | 適用 className                      |
+|--------------------------|-----------------------------------|
+| `:::comp-info`           | `is-style-comp-info`              |
+| `:::comp-warning`        | `is-style-comp-warning`           |
+| `:::sme-alert-success`   | `is-style-sme-alert-success` |
+| `:::my-custom-style`     | `is-style-my-custom-style`        |
 
 タイプ文字列には英字で始まる英数字・ハイフン・アンダースコア（`[a-zA-Z][a-zA-Z0-9_-]*`）が使用可能。
 
@@ -33,9 +33,9 @@
 :::
 ```
 
-| 省略記法 | 展開後の className |
-|---------|-------------------|
-| `:::info` | `is-style-comp-info` |
+| 省略記法         | 展開後の className |
+|--------------|-------------------|
+| `:::info`    | `is-style-comp-info` |
 | `:::warning` | `is-style-comp-warning` |
 | `:::success` | `is-style-comp-success` |
 
@@ -50,12 +50,16 @@
 {
   "callout": {
     "info": "comp-info",
-    "warning": "comp-warning",
-    "success": "comp-success"
+    "related": "comp-related",
+    "warning": "sme-alert-warning",
+    "success": "sme-alert-success"
   },
   "button": {
-    "primary": "vk-btn-primary",
-    "outline": "vk-btn-outline"
+    "blue": "comp-blue",
+    "orange": "comp-orange"
+  },
+  "reuse": {
+    "cta": 6961
   }
 }
 ```
@@ -90,20 +94,6 @@
 - コールアウトブロックの内側に画像記法を書いた場合も変換される
 - パターン1（`^!\[`）とパターン2（`^\[!\[`）は行頭文字が異なるため、互いに誤検知しない
 - 画像記法の行頭にインデント（スペース・タブ）を入れないこと（認識されない）
-
----
-
-### Visual Link Preview（`visual-link-preview/link`）
-
-[Visual Link Preview](https://wordpress.org/plugins/visual-link-preview/) プラグインのブロックを生成する。
-
-```
-[embed](https://example.com/article)
-```
-
-- URLのみ指定。タイトル・サムネイル・概要はプラグインがエディター上で自動取得する
-- デフォルト値: `nofollow: false`、`new_tab: true`、`template: 'simple'`、`type: 'external'`、`provider_used: 'php'`、`image_id: -1`
-- Visual Link Preview プラグインが未有効の場合は `core/paragraph` にリンクとしてフォールバック
 
 ---
 
@@ -170,10 +160,30 @@
 
 ```
 {{reuse:42}}
+{{reuse:cta}}
 ```
 
-WordPressの再利用ブロックを投稿IDで呼び出す。
-※ プロトタイプ段階はID直接指定。正式版でスラッグ対応予定。
+WordPressの再利用ブロックを呼び出す。投稿IDまたは `shorthand-map.json` で定義したエイリアスで指定できる。
+
+| 記法例 | 動作 |
+|--------|------|
+| `{{reuse:42}}` | 投稿ID 42 の再利用ブロックを挿入 |
+| `{{reuse:cta}}` | `shorthand-map.json` の `reuse.cta` に設定したIDの再利用ブロックを挿入 |
+
+エイリアスを使う場合は `shorthand-map.json` の `reuse` セクションにキーと投稿IDを追加する：
+
+```json
+{
+  "reuse": {
+    "cta": 6961,
+    "footer": 1234
+  }
+}
+```
+
+- エイリアスが `shorthand-map.json` に存在しない場合：
+  - 再利用ブロック**のみ**のペーストは標準ペーストにフォールバックし、テキストがそのまま挿入される
+  - 他のブロックと混在している場合は未解決のブロックのみスキップされる（他のブロックは正常挿入）
 
 ---
 
@@ -187,16 +197,24 @@ WordPressの再利用ブロックを投稿IDで呼び出す。
 
 ---
 
-### ショートコード（`core/shortcode`）
+### Visual Link Preview（`visual-link-preview/link`）
+
+[Visual Link Preview](https://wordpress.org/plugins/visual-link-preview/) プラグインのブロックを生成する。
 
 ```
-[contact-form-7 id="123" title="お問い合わせ"]
-[my_gallery columns="3"]
+[embed](https://example.com/article)
 ```
 
-標準のWordPressショートコード記法をそのままショートコードブロックに格納。
+- URLのみ指定。タイトル・サムネイル・概要はプラグインがエディター上で自動取得する
+- デフォルト値: `nofollow: false`、`new_tab: true`、`template: 'simple'`、`type: 'external'`、`provider_used: 'php'`、`image_id: -1`
+- Visual Link Preview プラグインが未有効の場合は `core/paragraph` にリンクとしてフォールバック
+- ブロック変換時に情報が表示されていない（空ブロックになっている）場合は、変換後のブロックを選択状態にし、サイドバーのブロック設定を開いて「Metadata Provider」項目内 "Select provider..." と表示されているプルダウンから"Self-hosted (PHP)" を選択することで、PHP側でURLの情報を取得して表示されるようになる
 
 ---
+
+## 未実装機能
+
+以下の記法は現在未実装です。将来のバージョンで対応予定です。
 
 ### 汎用ブロック挿入（吹き出し・固有ブロック等）
 

@@ -1,3 +1,5 @@
+import { REUSE_REGEX } from './line-parser';
+
 /**
  * Regex for button notation (loose check for hasNotation early return).
  */
@@ -249,6 +251,7 @@ export function hasNotation( text ) {
 		EMBED_REGEX.test( text ) ||
 		PLAIN_IMAGE_REGEX.test( text ) ||
 		LINKED_IMAGE_REGEX.test( text ) ||
-		BUTTON_NOTATION_REGEX.test( text )
+		BUTTON_NOTATION_REGEX.test( text ) ||
+		REUSE_REGEX.test( text )
 	);
 }
