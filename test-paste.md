@@ -99,6 +99,8 @@
 
 [embed](https://mypacecreator.net/blog/archives/3037)
 
+ブロック変換時に情報が表示されていない（空ブロックになっている）場合は、変換後のブロックを選択し、サイドバーのブロック設定を開いて「Metadata Provider」項目内 "Select provider..." と表示されているプルダウンから"Self-hosted (PHP)" を選択してください。PHP側でURLの情報を取得し、タイトル・サムネイル・概要が表示されるようになります。
+
 ---
 
 ## メディアとテキストブロック（実装済み）
