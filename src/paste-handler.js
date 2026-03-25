@@ -3,6 +3,9 @@ import { dispatch, select } from '@wordpress/data';
 import { parseNotation, hasNotation } from './notation-parser';
 import { parseLineSegments } from './line-parser';
 
+/** Maximum number of wp_block records to prefetch for slug resolution. */
+const REUSE_PREFETCH_LIMIT = 100;
+
 /**
  * Convert a button segment to a core/buttons > core/button block.
  *
@@ -195,7 +198,7 @@ function onPaste( event ) {
 	// does not call getEntityRecords on every reuse segment in the loop.
 	const cachedWpBlocks =
 		select( 'core' ).getEntityRecords( 'postType', 'wp_block', {
-			per_page: 100,
+			per_page: REUSE_PREFETCH_LIMIT,
 		} ) || [];
 	const slugToId = new Map(
 		cachedWpBlocks
@@ -324,7 +327,7 @@ export function installPasteHandler() {
 	// synchronously when the user pastes. getEntityRecords triggers a REST API fetch
 	// in the background and caches results in the WordPress data store.
 	// Blocks beyond the first 100 are not prefetched and cannot be resolved by slug.
-	select( 'core' ).getEntityRecords( 'postType', 'wp_block', { per_page: 100 } );
+	select( 'core' ).getEntityRecords( 'postType', 'wp_block', { per_page: REUSE_PREFETCH_LIMIT } );
 
 	// Fallback: attach to parent document (works if editor is NOT in iframe)
 	attachToDocument( document, 'parent document' );

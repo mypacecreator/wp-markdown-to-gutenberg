@@ -11,16 +11,18 @@ const BUTTON_REGEX = /^\[btn( [\w-]+)?\]\(([^)]+)\)\s+(.+)$/;
 const REUSE_REGEX = /^\{\{reuse:([\w-]+)\}\}$/;
 
 /**
- * Parse a text string line-by-line, extracting button notation lines.
+ * Parse a text string line-by-line, extracting button and reuse notation lines.
  *
  * Returns an array of segments:
  *   { type: 'text',   content: string }
  *   { type: 'button', url: string, label: string, className: string }
+ *   { type: 'reuse',  id: number|null, slug: string|null }
  *
  * Lines that do not match any notation are accumulated in a buffer and
  * flushed as a 'text' segment when a match is found or at the end.
  *
- * @param {string} text Plain text to parse
+ * @param {string} text          Plain text to parse
+ * @param {Object} shorthandMap  Optional shorthand map for button styles
  * @return {Array} Parsed segments
  */
 export function parseLineSegments( text, shorthandMap = {} ) {
