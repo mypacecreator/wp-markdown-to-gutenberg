@@ -187,13 +187,6 @@ function onPaste( event ) {
 		return;
 	}
 
-	// Block Gutenberg's default paste processing
-	event.preventDefault();
-	event.stopImmediatePropagation();
-
-	// eslint-disable-next-line no-console
-	console.log( '[WPMTG] Prevented default, converting to blocks...' );
-
 	const allBlocks = [];
 
 	for ( const segment of segments ) {
@@ -272,16 +265,17 @@ function onPaste( event ) {
 
 	if ( allBlocks.length === 0 ) {
 		// All segments failed to resolve (e.g. unknown alias or invalid ID) —
-		// fall back to standard paste so user input is not silently dropped.
-		const fallbackBlocks = pasteHandler( {
-			plainText,
-			mode: 'BLOCKS',
-		} );
-		if ( Array.isArray( fallbackBlocks ) && fallbackBlocks.length > 0 ) {
-			dispatch( 'core/block-editor' ).insertBlocks( fallbackBlocks );
-		}
+		// let Gutenberg handle the paste natively.
 		return;
 	}
+
+	// Block Gutenberg's default paste processing only when we have blocks to insert
+	event.preventDefault();
+	event.stopImmediatePropagation();
+
+	// eslint-disable-next-line no-console
+	console.log( '[WPMTG] Prevented default, inserting blocks...' );
+
 	dispatch( 'core/block-editor' ).insertBlocks( allBlocks );
 }
 
