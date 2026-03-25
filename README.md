@@ -50,12 +50,16 @@
 {
   "callout": {
     "info": "comp-info",
-    "warning": "comp-warning",
-    "success": "comp-success"
+    "related": "comp-related",
+    "warning": "sme-alert-warning",
+    "success": "sme-alert-success"
   },
   "button": {
-    "primary": "btn-primary",
-    "outline": "btn-outline"
+    "blue": "comp-blue",
+    "orange": "comp-orange"
+  },
+  "reuse": {
+    "cta": 6961
   }
 }
 ```

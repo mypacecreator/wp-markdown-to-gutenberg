@@ -1,12 +1,9 @@
+import { REUSE_REGEX } from './line-parser';
+
 /**
  * Regex for button notation (loose check for hasNotation early return).
  */
 const BUTTON_NOTATION_REGEX = /^\[btn[ \]]/m;
-
-/**
- * Regex for reuse notation: {{reuse:ID-or-alias}}
- */
-const REUSE_NOTATION_REGEX = /^\{\{reuse:[\w-]+\}\}[ \t\r]*$/m;
 
 /**
  * Regex for more notation: :::more:::
@@ -255,6 +252,6 @@ export function hasNotation( text ) {
 		PLAIN_IMAGE_REGEX.test( text ) ||
 		LINKED_IMAGE_REGEX.test( text ) ||
 		BUTTON_NOTATION_REGEX.test( text ) ||
-		REUSE_NOTATION_REGEX.test( text )
+		REUSE_REGEX.test( text )
 	);
 }
