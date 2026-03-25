@@ -231,9 +231,7 @@ media-text の前に置かれたコールアウトです。
 
 {{reuse:6961}}
 
-### エイリアス指定
-
-※ shorthand-map.json の "reusable" セクションで定義したエイリアスを使用
+### エイリアス指定（shorthand-map.json の reuse セクションで定義）
 
 {{reuse:cta}}
 

@@ -163,7 +163,7 @@ function onPaste( event ) {
 
 	const rawSegments = parseNotation( plainText, calloutShorthandMap );
 
-	// Expand text segments to detect button notation line-by-line
+	// Expand text segments to detect button and reuse notation line-by-line
 	const segments = rawSegments.flatMap( ( s ) =>
 		s.type === 'text'
 			? parseLineSegments( s.content, buttonShorthandMap, reuseShorthandMap )

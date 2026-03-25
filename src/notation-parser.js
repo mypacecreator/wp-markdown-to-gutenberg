@@ -4,9 +4,9 @@
 const BUTTON_NOTATION_REGEX = /^\[btn[ \]]/m;
 
 /**
- * Regex for reuse notation: {{reuse:ID_OR_SLUG}}
+ * Regex for reuse notation: {{reuse:ID-or-alias}}
  */
-const REUSE_NOTATION_REGEX = /^\{\{reuse:[\w-]+\}\}$/m;
+const REUSE_NOTATION_REGEX = /^\{\{reuse:[\w-]+\}\}[ \t\r]*$/m;
 
 /**
  * Regex for more notation: :::more:::
