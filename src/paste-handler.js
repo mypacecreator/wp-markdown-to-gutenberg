@@ -1,10 +1,7 @@
 import { pasteHandler, createBlock, getBlockType } from '@wordpress/blocks';
-import { dispatch, select } from '@wordpress/data';
+import { dispatch } from '@wordpress/data';
 import { parseNotation, hasNotation } from './notation-parser';
 import { parseLineSegments } from './line-parser';
-
-/** Maximum number of wp_block records to prefetch for slug resolution. */
-const REUSE_PREFETCH_LIMIT = 100;
 
 /**
  * Convert a button segment to a core/buttons > core/button block.
@@ -26,6 +23,7 @@ const shorthandConfig = ( typeof window !== 'undefined'
 	&& window.wpmtgConfig.shorthandMap ) || {};
 const calloutShorthandMap = shorthandConfig.callout || {};
 const buttonShorthandMap = shorthandConfig.button || {};
+const reuseShorthandMap = shorthandConfig.reuse || {};
 
 /**
  * Convert an image segment to a core/image block.
@@ -167,7 +165,9 @@ function onPaste( event ) {
 
 	// Expand text segments to detect button notation line-by-line
 	const segments = rawSegments.flatMap( ( s ) =>
-		s.type === 'text' ? parseLineSegments( s.content, buttonShorthandMap ) : [ s ]
+		s.type === 'text'
+			? parseLineSegments( s.content, buttonShorthandMap, reuseShorthandMap )
+			: [ s ]
 	);
 
 	// eslint-disable-next-line no-console
@@ -193,18 +193,6 @@ function onPaste( event ) {
 
 	// eslint-disable-next-line no-console
 	console.log( '[WPMTG] Prevented default, converting to blocks...' );
-
-	// Build slug→id lookup once from the prefetched cache so slug resolution
-	// does not call getEntityRecords on every reuse segment in the loop.
-	const cachedWpBlocks =
-		select( 'core' ).getEntityRecords( 'postType', 'wp_block', {
-			per_page: REUSE_PREFETCH_LIMIT,
-		} ) || [];
-	const slugToId = new Map(
-		cachedWpBlocks
-			.filter( ( b ) => b.slug && b.id > 0 )
-			.map( ( b ) => [ b.slug, b.id ] )
-	);
 
 	const allBlocks = [];
 
@@ -264,14 +252,8 @@ function onPaste( event ) {
 				createBlock( 'core/media-text', mediaAttrs, innerBlocks )
 			);
 		} else if ( segment.type === 'reuse' ) {
-			let ref = null;
 			if ( segment.id !== null && segment.id > 0 ) {
-				ref = segment.id;
-			} else if ( segment.slug ) {
-				ref = slugToId.get( segment.slug ) ?? null;
-			}
-			if ( ref !== null ) {
-				allBlocks.push( createBlock( 'core/block', { ref } ) );
+				allBlocks.push( createBlock( 'core/block', { ref: segment.id } ) );
 			}
 		} else if ( segment.content.trim() ) {
 			const normalBlocks = pasteHandler( {
@@ -289,7 +271,7 @@ function onPaste( event ) {
 	console.log( '[WPMTG] All blocks to insert:', allBlocks );
 
 	if ( allBlocks.length === 0 ) {
-		// All segments failed to resolve (e.g. slug not yet in cache) —
+		// All segments failed to resolve (e.g. unknown alias or invalid ID) —
 		// fall back to standard paste so user input is not silently dropped.
 		const fallbackBlocks = pasteHandler( {
 			plainText,
@@ -323,12 +305,6 @@ function attachToDocument( doc, label ) {
  * it appears and its contentDocument is accessible.
  */
 export function installPasteHandler() {
-	// Prefetch the first 100 reusable blocks (wp_block) so slug resolution works
-	// synchronously when the user pastes. getEntityRecords triggers a REST API fetch
-	// in the background and caches results in the WordPress data store.
-	// Blocks beyond the first 100 are not prefetched and cannot be resolved by slug.
-	select( 'core' ).getEntityRecords( 'postType', 'wp_block', { per_page: REUSE_PREFETCH_LIMIT } );
-
 	// Fallback: attach to parent document (works if editor is NOT in iframe)
 	attachToDocument( document, 'parent document' );
 

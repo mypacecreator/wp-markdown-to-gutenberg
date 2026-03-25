@@ -8,5 +8,8 @@
   "button": {
     "blue": "comp-blue",
     "orange": "comp-orange"
+  },
+  "reuse": {
+    "cta": 6961
   }
 }
