@@ -8,7 +8,7 @@ const BUTTON_REGEX = /^\[btn( [\w-]+)?\]\(([^)]+)\)\s+(.+)$/;
  * Regex for reuse notation: {{reuse:ID_OR_ALIAS}}
  * Captures: [1] numeric ID or shorthand alias (word chars and hyphens)
  */
-const REUSE_REGEX = /^\{\{reuse:([\w-]+)\}\}$/;
+const REUSE_REGEX = /^\{\{reuse:([\w-]+)\}\}[ \t\r]*$/;
 
 /**
  * Parse a text string line-by-line, extracting button and reuse notation lines.
@@ -60,8 +60,11 @@ export function parseLineSegments( text, shorthandMap = {}, reuseShorthandMap = 
 			let numericId = null;
 			if ( /^\d+$/.test( idOrAlias ) ) {
 				numericId = parseInt( idOrAlias, 10 );
-			} else if ( reuseShorthandMap[ idOrAlias ] > 0 ) {
-				numericId = reuseShorthandMap[ idOrAlias ];
+			} else {
+				const mapped = parseInt( reuseShorthandMap[ idOrAlias ], 10 );
+				if ( mapped > 0 ) {
+					numericId = mapped;
+				}
 			}
 			result.push( { type: 'reuse', id: numericId } );
 			continue;
