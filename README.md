@@ -144,6 +144,23 @@
 | `[btn](URL) テキスト` | プライマリ（塗り） |
 | `[btn outline](URL) テキスト` | セカンダリ（枠線） |
 
+#### デフォルト設定
+
+ボタンブロックのペースト時、外側の `core/buttons` ブロックに以下のデフォルト設定が自動的に適用される。
+
+| 設定 | デフォルト値 | 効果 |
+|------|------------|------|
+| フォントサイズ | M（medium） | `has-custom-font-size has-medium-font-size` クラスを付与 |
+| 項目の揃え位置 | 中央寄せ（center） | `is-content-justification-center` クラスを付与 |
+
+出力されるHTMLの例：
+
+```html
+<div class="wp-block-buttons has-custom-font-size has-medium-font-size is-content-justification-center is-layout-flex wp-block-buttons-is-layout-flex">
+  <div class="wp-block-button"><a class="wp-block-button__link wp-element-button" href="https://example.com">ボタンテキスト</a></div>
+</div>
+```
+
 #### ボタンスタイルの省略記法
 
 コールアウトと同様、ボタンスタイルも `shorthand-map.json` の `button` セクションで省略記法を定義できる。
