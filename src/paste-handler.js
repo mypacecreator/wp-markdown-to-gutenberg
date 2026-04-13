@@ -27,7 +27,10 @@ function buttonsSegmentToBlock( segment ) {
 		url: segment.url,
 		className: segment.className,
 	} );
-	return createBlock( 'core/buttons', {}, [ btn ] );
+	return createBlock( 'core/buttons', {
+		fontSize: 'medium',
+		layout: { type: 'flex', justifyContent: 'center' },
+	}, [ btn ] );
 }
 
 const shorthandConfig = ( typeof window !== 'undefined'
