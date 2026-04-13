@@ -1,7 +1,19 @@
 import { pasteHandler, createBlock, getBlockType } from '@wordpress/blocks';
-import { dispatch } from '@wordpress/data';
+import { dispatch, select } from '@wordpress/data';
 import { parseNotation, hasNotation } from './notation-parser';
 import { parseLineSegments } from './line-parser';
+
+/**
+ * Get the nearest enclosing Gutenberg block's clientId from a DOM event.
+ * Gutenberg annotates block wrapper elements with data-block="clientId".
+ *
+ * @param {Event} event  The DOM event (e.g. paste)
+ * @return {string|null} clientId or null if not found
+ */
+function getTargetClientId( event ) {
+	const blockEl = event.target?.closest( '[data-block]' );
+	return blockEl?.dataset?.block ?? null;
+}
 
 /**
  * Convert a button segment to a core/buttons > core/button block.
@@ -276,7 +288,33 @@ function onPaste( event ) {
 	// eslint-disable-next-line no-console
 	console.log( '[WPMTG] Prevented default, inserting blocks...' );
 
-	dispatch( 'core/block-editor' ).insertBlocks( allBlocks );
+	// Determine insertion position.
+	// Priority: (1) DOM-based clientId from event.target (survives tab switches),
+	// (2) store selection, (3) default (appends to end).
+	const targetClientId =
+		getTargetClientId( event ) ||
+		select( 'core/block-editor' ).getSelectedBlockClientId();
+
+	if ( targetClientId ) {
+		const insertionIndex = select( 'core/block-editor' ).getBlockIndex(
+			targetClientId
+		);
+		const rootClientId =
+			select( 'core/block-editor' ).getBlockRootClientId(
+				targetClientId
+			) || undefined;
+		if ( insertionIndex !== -1 ) {
+			dispatch( 'core/block-editor' ).insertBlocks(
+				allBlocks,
+				insertionIndex + 1,
+				rootClientId
+			);
+		} else {
+			dispatch( 'core/block-editor' ).insertBlocks( allBlocks );
+		}
+	} else {
+		dispatch( 'core/block-editor' ).insertBlocks( allBlocks );
+	}
 }
 
 /**
