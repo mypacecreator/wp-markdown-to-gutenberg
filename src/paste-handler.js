@@ -132,12 +132,26 @@ function embedSegmentToBlock( segment ) {
  * @return {Array} Gutenberg blocks
  */
 function innerSegmentsToBlocks( innerSegments ) {
+	// Expand text segments to detect button and reuse notation line-by-line,
+	// mirroring the same flatMap applied to top-level segments in onPaste().
+	const expandedSegments = innerSegments.flatMap( ( inner ) =>
+		inner.type === 'text'
+			? parseLineSegments( inner.content, buttonShorthandMap, reuseShorthandMap )
+			: [ inner ]
+	);
+
 	const blocks = [];
-	for ( const inner of innerSegments ) {
+	for ( const inner of expandedSegments ) {
 		if ( inner.type === 'image' ) {
 			blocks.push( imageSegmentToBlock( inner ) );
 		} else if ( inner.type === 'embed' ) {
 			blocks.push( embedSegmentToBlock( inner ) );
+		} else if ( inner.type === 'button' ) {
+			blocks.push( buttonsSegmentToBlock( inner ) );
+		} else if ( inner.type === 'reuse' ) {
+			if ( inner.id !== null && inner.id > 0 ) {
+				blocks.push( createBlock( 'core/block', { ref: inner.id } ) );
+			}
 		} else if ( inner.content.trim() ) {
 			const converted = pasteHandler( {
 				plainText: inner.content,
