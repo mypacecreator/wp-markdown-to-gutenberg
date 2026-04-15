@@ -56,7 +56,6 @@ export function parseLineSegments( text, shorthandMap = {}, reuseShorthandMap = 
 
 		const reuseMatch = REUSE_REGEX.exec( line );
 		if ( reuseMatch ) {
-			flushBuffer();
 			const idOrAlias = reuseMatch[ 1 ];
 			let numericId = null;
 			if ( /^\d+$/.test( idOrAlias ) ) {
@@ -68,8 +67,10 @@ export function parseLineSegments( text, shorthandMap = {}, reuseShorthandMap = 
 				}
 			}
 			if ( numericId !== null && numericId > 0 ) {
+				flushBuffer();
 				result.push( { type: 'reuse', id: numericId } );
 			} else {
+				// Unresolvable alias/ID — keep in buffer as plain text
 				buffer.push( line );
 			}
 			continue;
