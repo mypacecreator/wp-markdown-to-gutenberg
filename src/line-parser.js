@@ -16,7 +16,8 @@ const REUSE_REGEX = /^\{\{reuse:([\w-]+)\}\}[ \t\r]*$/m;
  * Returns an array of segments:
  *   { type: 'text',   content: string }
  *   { type: 'button', url: string, label: string, className: string }
- *   { type: 'reuse',  id: number|null }
+ *   { type: 'reuse',  id: number }  — only emitted when id is resolvable (> 0);
+ *                                     unresolvable reuse lines are treated as text
  *
  * Lines that do not match any notation are accumulated in a buffer and
  * flushed as a 'text' segment when a match is found or at the end.
@@ -66,7 +67,11 @@ export function parseLineSegments( text, shorthandMap = {}, reuseShorthandMap = 
 					numericId = mapped;
 				}
 			}
-			result.push( { type: 'reuse', id: numericId, raw: line } );
+			if ( numericId !== null && numericId > 0 ) {
+				result.push( { type: 'reuse', id: numericId } );
+			} else {
+				buffer.push( line );
+			}
 			continue;
 		}
 

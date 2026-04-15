@@ -151,11 +151,6 @@ function innerSegmentsToBlocks( innerSegments ) {
 		} else if ( inner.type === 'reuse' ) {
 			if ( inner.id !== null && inner.id > 0 ) {
 				blocks.push( createBlock( 'core/block', { ref: inner.id } ) );
-			} else if ( inner.raw ) {
-				const converted = pasteHandler( { plainText: inner.raw, mode: 'BLOCKS' } );
-				if ( Array.isArray( converted ) ) {
-					blocks.push( ...converted );
-				}
 			}
 		} else if ( inner.content.trim() ) {
 			const converted = pasteHandler( {
@@ -281,11 +276,6 @@ function onPaste( event ) {
 		} else if ( segment.type === 'reuse' ) {
 			if ( segment.id !== null && segment.id > 0 ) {
 				allBlocks.push( createBlock( 'core/block', { ref: segment.id } ) );
-			} else if ( segment.raw ) {
-				const converted = pasteHandler( { plainText: segment.raw, mode: 'BLOCKS' } );
-				if ( Array.isArray( converted ) ) {
-					allBlocks.push( ...converted );
-				}
 			}
 		} else if ( segment.content.trim() ) {
 			const normalBlocks = pasteHandler( {
