@@ -127,17 +127,33 @@ function embedSegmentToBlock( segment ) {
 
 /**
  * Convert an array of inner segments (from notation-parser) into blocks.
+ * Text segments are first expanded via parseLineSegments() so that button
+ * and reuse notation nested inside callout/media-text blocks is handled.
  *
- * @param {Array} innerSegments  Parsed segments (image, embed, or text)
+ * @param {Array} innerSegments  Parsed segments (image, embed, text, button, or reuse)
  * @return {Array} Gutenberg blocks
  */
 function innerSegmentsToBlocks( innerSegments ) {
+	// Expand text segments to detect button and reuse notation line-by-line,
+	// mirroring the same flatMap applied to top-level segments in onPaste().
+	const expandedSegments = innerSegments.flatMap( ( inner ) =>
+		inner.type === 'text'
+			? parseLineSegments( inner.content, buttonShorthandMap, reuseShorthandMap )
+			: [ inner ]
+	);
+
 	const blocks = [];
-	for ( const inner of innerSegments ) {
+	for ( const inner of expandedSegments ) {
 		if ( inner.type === 'image' ) {
 			blocks.push( imageSegmentToBlock( inner ) );
 		} else if ( inner.type === 'embed' ) {
 			blocks.push( embedSegmentToBlock( inner ) );
+		} else if ( inner.type === 'button' ) {
+			blocks.push( buttonsSegmentToBlock( inner ) );
+		} else if ( inner.type === 'reuse' ) {
+			if ( inner.id > 0 ) {
+				blocks.push( createBlock( 'core/block', { ref: inner.id } ) );
+			}
 		} else if ( inner.content.trim() ) {
 			const converted = pasteHandler( {
 				plainText: inner.content,
@@ -260,7 +276,7 @@ function onPaste( event ) {
 				createBlock( 'core/media-text', mediaAttrs, innerBlocks )
 			);
 		} else if ( segment.type === 'reuse' ) {
-			if ( segment.id !== null && segment.id > 0 ) {
+			if ( segment.id > 0 ) {
 				allBlocks.push( createBlock( 'core/block', { ref: segment.id } ) );
 			}
 		} else if ( segment.content.trim() ) {
