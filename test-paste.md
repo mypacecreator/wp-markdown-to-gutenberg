@@ -36,6 +36,15 @@
 ## お知らせ（省略記法）
 
 これは `:::info` 省略記法のテストです。`is-style-comp-info` が適用されます。
+
+[btn](https://example.com/apply) 塗りつぶし
+
+[btn outline](https://example.com/detail) アウトライン
+
+[btn blue](https://example.com/detail) ブルー立体
+
+[btn orange](https://example.com/detail) オレンジ立体
+
 :::
 
 ### 省略記法 — WARNING
@@ -115,7 +124,15 @@
 
 - 項目A
 - 項目B
-  :::
+
+[btn](https://example.com/apply) 塗りつぶし
+
+[btn outline](https://example.com/detail) アウトライン
+
+[btn blue](https://example.com/detail) ブルー立体
+
+[btn orange](https://example.com/detail) オレンジ立体
+:::
 
 ### 右配置
 
