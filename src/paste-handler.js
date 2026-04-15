@@ -1,7 +1,19 @@
 import { pasteHandler, createBlock, getBlockType } from '@wordpress/blocks';
-import { dispatch } from '@wordpress/data';
+import { dispatch, select } from '@wordpress/data';
 import { parseNotation, hasNotation } from './notation-parser';
 import { parseLineSegments } from './line-parser';
+
+/**
+ * Get the nearest enclosing Gutenberg block's clientId from a DOM event.
+ * Gutenberg annotates block wrapper elements with data-block="clientId".
+ *
+ * @param {Event} event  The DOM event (e.g. paste)
+ * @return {string|null} clientId or null if not found
+ */
+function getTargetClientId( event ) {
+	const blockEl = event.target?.closest( '[data-block]' );
+	return blockEl?.dataset?.block ?? null;
+}
 
 /**
  * Convert a button segment to a core/buttons > core/button block.
@@ -279,7 +291,56 @@ function onPaste( event ) {
 	// eslint-disable-next-line no-console
 	console.log( '[WPMTG] Prevented default, inserting blocks...' );
 
-	dispatch( 'core/block-editor' ).insertBlocks( allBlocks );
+	// Determine insertion position.
+	// Priority: (1) DOM-based clientId from event.target (survives tab switches),
+	// (2) store selection, (3) default (appends to end).
+	// rootClientId must be resolved before getBlockIndex to correctly handle
+	// nested blocks (e.g. inside a Group block); without it getBlockIndex
+	// searches only the root-level order and returns -1.
+	const blockEditorSelect = select( 'core/block-editor' );
+	const domTargetClientId = getTargetClientId( event );
+	const selectedClientId = blockEditorSelect.getSelectedBlockClientId();
+	let targetClientId = domTargetClientId || selectedClientId;
+	let rootClientId;
+	let insertionIndex = -1;
+
+	if ( targetClientId ) {
+		rootClientId =
+			blockEditorSelect.getBlockRootClientId( targetClientId ) ||
+			undefined;
+		insertionIndex = blockEditorSelect.getBlockIndex(
+			targetClientId,
+			rootClientId
+		);
+
+		// If DOM-derived clientId is stale (returns -1), retry with the
+		// store selection as a fallback.
+		if (
+			insertionIndex === -1 &&
+			domTargetClientId &&
+			selectedClientId &&
+			selectedClientId !== domTargetClientId
+		) {
+			targetClientId = selectedClientId;
+			rootClientId =
+				blockEditorSelect.getBlockRootClientId( targetClientId ) ||
+				undefined;
+			insertionIndex = blockEditorSelect.getBlockIndex(
+				targetClientId,
+				rootClientId
+			);
+		}
+	}
+
+	if ( insertionIndex !== -1 ) {
+		dispatch( 'core/block-editor' ).insertBlocks(
+			allBlocks,
+			insertionIndex + 1,
+			rootClientId
+		);
+	} else {
+		dispatch( 'core/block-editor' ).insertBlocks( allBlocks );
+	}
 }
 
 /**
