@@ -66,7 +66,7 @@ export function parseLineSegments( text, shorthandMap = {}, reuseShorthandMap = 
 					numericId = mapped;
 				}
 			}
-			result.push( { type: 'reuse', id: numericId } );
+			result.push( { type: 'reuse', id: numericId, raw: line } );
 			continue;
 		}
 
