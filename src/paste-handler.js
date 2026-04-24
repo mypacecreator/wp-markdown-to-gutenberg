@@ -207,6 +207,7 @@ function onPaste( event ) {
 	const hasActionable = segments.some(
 		( s ) =>
 			s.type === 'callout' ||
+			s.type === 'cols' ||
 			s.type === 'image' ||
 			s.type === 'embed' ||
 			s.type === 'button' ||
@@ -223,6 +224,22 @@ function onPaste( event ) {
 	for ( const segment of segments ) {
 		if ( segment.type === 'button' ) {
 			allBlocks.push( buttonsSegmentToBlock( segment ) );
+		} else if ( segment.type === 'cols' ) {
+			const [ imgA, imgB, ...rest ] = segment.imageSegments;
+			const columns = [];
+			if ( imgA ) {
+				columns.push( createBlock( 'core/column', {}, [ imageSegmentToBlock( imgA ) ] ) );
+			}
+			if ( imgB ) {
+				columns.push( createBlock( 'core/column', {}, [ imageSegmentToBlock( imgB ) ] ) );
+			}
+			if ( columns.length > 0 ) {
+				allBlocks.push( createBlock( 'core/columns', {}, columns ) );
+			}
+			// Extra images (3枚以上の場合) は個別ブロックとして後続に追加
+			for ( const img of rest ) {
+				allBlocks.push( imageSegmentToBlock( img ) );
+			}
 		} else if ( segment.type === 'image' ) {
 			allBlocks.push( imageSegmentToBlock( segment ) );
 		} else if ( segment.type === 'embed' ) {
