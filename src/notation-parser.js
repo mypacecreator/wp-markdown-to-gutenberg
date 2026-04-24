@@ -96,6 +96,17 @@ const MEDIA_TEXT_PATTERN =
 	'^:::media-text(?:\\s+(right))?(?:\\s+(\\d+)%)?\\s*\\n([\\s\\S]*?)\\n^[ \\t]*:::[ \\t]*$';
 
 /**
+ * Source pattern for :::cols blocks (two images side by side).
+ *
+ * :::cols
+ * ![alt A](url-a)
+ * ![alt B](url-b)
+ * :::
+ */
+const COLS_PATTERN =
+	'^:::cols\\s*\\n([\\s\\S]*?)\\n^[ \\t]*:::[ \\t]*$';
+
+/**
  * Extract the first image segment from an array of segments parsed by
  * splitTextByImages, returning the image and the remaining segments.
  *
@@ -125,6 +136,7 @@ function extractFirstImage( segments ) {
  *   { type: 'text',       content: '...' }
  *   { type: 'image',      alt: '...', url: '...', href?: '...' }
  *   { type: 'callout',    calloutType: '...', content: '...', innerSegments: [...] }
+ *   { type: 'cols',       imageSegments: [{ alt, url, href? }, ...] }
  *   { type: 'media-text', mediaPosition: 'left'|'right', mediaWidth: number,
  *                          imageSegment: { alt, url, href? }, innerSegments: [...] }
  *
@@ -142,8 +154,8 @@ export function parseNotation( text, shorthandMap = {} ) {
 	const calloutRegex = /^:::([a-zA-Z][a-zA-Z0-9_-]*)\s*\n([\s\S]*?)\n^[ \t]*:::[ \t]*$/gm;
 	let m;
 	while ( ( m = calloutRegex.exec( normalized ) ) !== null ) {
-		// Skip media-text blocks (handled by dedicated regex below)
-		if ( m[ 1 ] === 'media-text' ) {
+		// Skip blocks handled by dedicated regexes below
+		if ( m[ 1 ] === 'media-text' || m[ 1 ] === 'cols' ) {
 			continue;
 		}
 		matches.push( {
@@ -165,6 +177,17 @@ export function parseNotation( text, shorthandMap = {} ) {
 			position: m[ 1 ] || null,
 			width: m[ 2 ] || null,
 			content: m[ 3 ],
+		} );
+	}
+
+	// Cols blocks (:::cols)
+	const colsRegex = new RegExp( COLS_PATTERN, 'gm' );
+	while ( ( m = colsRegex.exec( normalized ) ) !== null ) {
+		matches.push( {
+			kind: 'cols',
+			index: m.index,
+			length: m[ 0 ].length,
+			content: m[ 1 ],
 		} );
 	}
 
@@ -222,6 +245,22 @@ export function parseNotation( text, shorthandMap = {} ) {
 				imageSegment: imageSegment || null,
 				innerSegments: rest,
 			} );
+		} else if ( mt.kind === 'cols' ) {
+			const innerParsed = splitTextByImages( mt.content );
+			const imageSegments = innerParsed.filter( ( s ) => s.type === 'image' );
+			const hasOnlyImages = innerParsed.every(
+				( s ) => s.type === 'image' || ( s.type === 'text' && ! s.content.trim() )
+			);
+
+			if ( imageSegments.length > 0 && hasOnlyImages ) {
+				segments.push( {
+					type: 'cols',
+					imageSegments,
+				} );
+			} else {
+				// 画像以外のコンテンツが混在している場合は通常のセグメントにフォールバック
+				segments.push( ...innerParsed );
+			}
 		} else if ( mt.kind === 'more' ) {
 			segments.push( { type: 'more' } );
 		}

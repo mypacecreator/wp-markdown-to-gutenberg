@@ -132,6 +132,27 @@
 
 ---
 
+### 2カラム画像ブロック（`core/columns` / `core/gallery`）
+
+画像を左右2枚並べて配置するブロックに変換。ビフォー／アフター比較や商品カット2枚を並べるケースを想定。
+
+```
+:::cols
+![ビフォー](https://example.com/before.jpg)
+![アフター](https://example.com/after.jpg)
+:::
+```
+
+| 画像枚数 | 生成ブロック |
+|---------|------------|
+| 2枚 | `core/columns`（等幅2カラム） |
+| 1枚 | `core/columns`（1カラム） |
+| 3枚以上 | `core/gallery` |
+
+- リンク付き画像（`[![alt](img)](link)`）も使用可能
+
+---
+
 ### ボタンブロック（`core/buttons` > `core/button`）
 
 ```

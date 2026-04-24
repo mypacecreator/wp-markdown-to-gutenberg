@@ -207,6 +207,7 @@ function onPaste( event ) {
 	const hasActionable = segments.some(
 		( s ) =>
 			s.type === 'callout' ||
+			s.type === 'cols' ||
 			s.type === 'image' ||
 			s.type === 'embed' ||
 			s.type === 'button' ||
@@ -223,6 +224,26 @@ function onPaste( event ) {
 	for ( const segment of segments ) {
 		if ( segment.type === 'button' ) {
 			allBlocks.push( buttonsSegmentToBlock( segment ) );
+		} else if ( segment.type === 'cols' ) {
+			const images = segment.imageSegments;
+			if ( images.length >= 3 ) {
+				// 3枚以上 → core/gallery（inner blocks 形式）
+				allBlocks.push(
+					createBlock(
+						'core/gallery',
+						{},
+						images.map( ( img ) => imageSegmentToBlock( img ) )
+					)
+				);
+			} else {
+				// 1〜2枚 → core/columns
+				const columns = images.map( ( img ) =>
+					createBlock( 'core/column', {}, [ imageSegmentToBlock( img ) ] )
+				);
+				if ( columns.length > 0 ) {
+					allBlocks.push( createBlock( 'core/columns', {}, columns ) );
+				}
+			}
 		} else if ( segment.type === 'image' ) {
 			allBlocks.push( imageSegmentToBlock( segment ) );
 		} else if ( segment.type === 'embed' ) {

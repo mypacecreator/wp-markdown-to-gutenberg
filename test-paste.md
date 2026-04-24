@@ -256,6 +256,52 @@ media-text の前に置かれたコールアウトです。
 
 ---
 
+## 2カラム画像ブロック（実装済み）
+
+### 基本形（2枚並べ）
+
+:::cols
+![ビフォー](https://placehold.co/600x400/E8F5E9/333?text=Before)
+![アフター](https://placehold.co/600x400/FCE4EC/333?text=After)
+:::
+
+### 1枚のみ（フォールバック: 1カラムのcolumnsブロック）
+
+:::cols
+![1枚のみ](https://placehold.co/600x400/E3F2FD/333?text=Single)
+:::
+
+### 3枚以上（core/gallery ブロックに変換）
+
+:::cols
+![画像A](https://placehold.co/600x400/FFF3E0/333?text=A)
+![画像B](https://placehold.co/600x400/F3E5F5/333?text=B)
+![画像C](https://placehold.co/600x400/E0F7FA/333?text=C)
+:::
+
+### コールアウトとの混在
+
+:::info
+colsブロックの前に置かれたコールアウトです。
+:::
+
+:::cols
+![商品カット1](https://placehold.co/600x400/FFCCBC/333?text=Product+1)
+![商品カット2](https://placehold.co/600x400/D1C4E9/333?text=Product+2)
+:::
+
+### テキスト混在（フォールバック: :::cols を無視して通常ブロックとして処理）
+
+> 期待動作: core/columns にならず、画像2枚とテキストが個別ブロックとして挿入される
+
+:::cols
+![A](https://placehold.co/600x400/E8F5E9/333?text=A)
+なんらかのテキスト
+![B](https://placehold.co/600x400/FCE4EC/333?text=B)
+:::
+
+---
+
 ## ショートコード（WordPress 標準対応）
 
 [contact-form-7 id="1" title="お問い合わせフォーム"]
