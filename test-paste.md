@@ -271,7 +271,7 @@ media-text の前に置かれたコールアウトです。
 ![1枚のみ](https://placehold.co/600x400/E3F2FD/333?text=Single)
 :::
 
-### 3枚以上（3枚目以降は単独imageブロックとして後続に追加）
+### 3枚以上（core/gallery ブロックに変換）
 
 :::cols
 ![画像A](https://placehold.co/600x400/FFF3E0/333?text=A)
