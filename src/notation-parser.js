@@ -248,10 +248,19 @@ export function parseNotation( text, shorthandMap = {} ) {
 		} else if ( mt.kind === 'cols' ) {
 			const innerParsed = splitTextByImages( mt.content );
 			const imageSegments = innerParsed.filter( ( s ) => s.type === 'image' );
-			segments.push( {
-				type: 'cols',
-				imageSegments,
-			} );
+			const hasOnlyImages = innerParsed.every(
+				( s ) => s.type === 'image' || ( s.type === 'text' && ! s.content.trim() )
+			);
+
+			if ( imageSegments.length > 0 && hasOnlyImages ) {
+				segments.push( {
+					type: 'cols',
+					imageSegments,
+				} );
+			} else {
+				// 画像以外のコンテンツが混在している場合は通常のセグメントにフォールバック
+				segments.push( ...innerParsed );
+			}
 		} else if ( mt.kind === 'more' ) {
 			segments.push( { type: 'more' } );
 		}
