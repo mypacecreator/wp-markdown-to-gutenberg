@@ -290,6 +290,16 @@ colsブロックの前に置かれたコールアウトです。
 ![商品カット2](https://placehold.co/600x400/D1C4E9/333?text=Product+2)
 :::
 
+### テキスト混在（フォールバック: :::cols を無視して通常ブロックとして処理）
+
+> 期待動作: core/columns にならず、画像2枚とテキストが個別ブロックとして挿入される
+
+:::cols
+![A](https://placehold.co/600x400/E8F5E9/333?text=A)
+なんらかのテキスト
+![B](https://placehold.co/600x400/FCE4EC/333?text=B)
+:::
+
 ---
 
 ## ショートコード（WordPress 標準対応）
