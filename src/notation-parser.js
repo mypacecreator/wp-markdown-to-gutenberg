@@ -12,13 +12,15 @@ const MORE_NOTATION_REGEX = /^:::more:::[ \t\r]*$/m;
 
 /**
  * Regex for linked image: [![alt](img-url)](link-url)
+ * Group 1: alt, Group 2: img-url, Group 3: link-url, Group 4: align or undefined
  */
-const LINKED_IMAGE_REGEX = /^\[!\[([^\]]*)\]\(([^)]+)\)\]\(([^)]+)\)\s*$/m;
+const LINKED_IMAGE_REGEX = /^\[!\[([^\]]*)\]\(([^)]+)\)\]\(([^)]+)\)(?:\s+(left|center|right|wide|full))?\s*$/m;
 
 /**
  * Regex for plain image: ![alt](img-url)
+ * Group 1: alt, Group 2: url, Group 3: align or undefined
  */
-const PLAIN_IMAGE_REGEX = /^!\[([^\]]*)\]\(([^)]+)\)\s*$/m;
+const PLAIN_IMAGE_REGEX = /^!\[([^\]]*)\]\(([^)]+)\)(?:\s+(left|center|right|wide|full))?\s*$/m;
 
 /**
  * Regex for embed (Visual Link Preview): [embed](url)
@@ -60,7 +62,7 @@ function splitTextByImages( text ) {
 				result.push( { type: 'text', content: buffer.join( '\n' ) } );
 				buffer = [];
 			}
-			result.push( { type: 'image', alt: linked[ 1 ], url: linked[ 2 ], href: linked[ 3 ] } );
+			result.push( { type: 'image', alt: linked[ 1 ], url: linked[ 2 ], href: linked[ 3 ], align: linked[ 4 ] || null } );
 			continue;
 		}
 
@@ -70,7 +72,7 @@ function splitTextByImages( text ) {
 				result.push( { type: 'text', content: buffer.join( '\n' ) } );
 				buffer = [];
 			}
-			result.push( { type: 'image', alt: plain[ 1 ], url: plain[ 2 ] } );
+			result.push( { type: 'image', alt: plain[ 1 ], url: plain[ 2 ], align: plain[ 3 ] || null } );
 			continue;
 		}
 

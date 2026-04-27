@@ -52,6 +52,9 @@ function imageSegmentToBlock( segment ) {
 		attrs.href = segment.href;
 		attrs.linkDestination = 'custom';
 	}
+	if ( segment.align ) {
+		attrs.align = segment.align;
+	}
 	return createBlock( 'core/image', attrs );
 }
 
