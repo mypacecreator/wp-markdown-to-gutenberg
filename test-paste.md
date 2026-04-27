@@ -256,6 +256,28 @@ media-text の前に置かれたコールアウトです。
 
 ---
 
+## 画像ブロック（実装済み）
+
+#### パターン1：通常の画像
+
+![alt テキスト](https://example.com/image.png)
+
+#### パターン2：リンク付き画像
+
+[![alt テキスト](https://example.com/image.png)](https://example.com/link)
+
+#### パターン3：揃え指定付き
+
+![alt テキスト](https://example.com/image.png) right
+
+![alt テキスト](https://example.com/image.png) center
+
+[![alt](https://example.com/image.png)](https://example.com) left
+
+> 期待動作: 各画像ブロックに alignright / aligncenter / alignleft が適用される
+
+---
+
 ## 2カラム画像ブロック（実装済み）
 
 ### 基本形（2枚並べ）
@@ -298,6 +320,15 @@ colsブロックの前に置かれたコールアウトです。
 ![A](https://placehold.co/600x400/E8F5E9/333?text=A)
 なんらかのテキスト
 ![B](https://placehold.co/600x400/FCE4EC/333?text=B)
+:::
+
+### 揃え指定付き（:::cols 内）
+
+> 期待動作: core/columns 内の各画像ブロックに alignright / alignleft が適用される
+
+:::cols
+![A](https://placehold.co/600x400/E8F5E9/333?text=A) right
+![B](https://placehold.co/600x400/FCE4EC/333?text=B) left
 :::
 
 ---
